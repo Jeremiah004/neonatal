@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Smart Neonatal Warmer — Predictive Maintenance Dashboard</title>
+<style>
+  :root {
+    --bg:      #0f1117;
+    --card:    #1a1d27;
+    --border:  #2a2d3e;
+    --accent:  #4f8ef7;
+    --green:   #22c55e;
+    --amber:   #f59e0b;
+    --red:     #ef4444;
+    --text:    #e2e8f0;
+    --muted:   #64748b;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg); color: var(--text);
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    min-height: 100vh; padding: 24px;
+  }
+  header {
+    display: flex; align-items: center; gap: 16px;
+    margin-bottom: 28px;
+  }
+  header h1 { font-size: 1.4rem; font-weight: 600; }
+  header p  { font-size: 0.85rem; color: var(--muted); margin-top: 2px; }
+  .pulse {
+    width: 10px; height: 10px; border-radius: 50%;
+    background: var(--green); flex-shrink: 0;
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0%,100% { opacity:1; transform:scale(1); }
+    50%      { opacity:.5; transform:scale(1.4); }
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px; margin-bottom: 28px;
+  }
+  .card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 12px; padding: 20px;
+  }
+  .card .label { font-size: 0.75rem; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+  .card .value { font-size: 2rem; font-weight: 700; margin-top: 6px; }
+  .card .sub   { font-size: 0.78rem; color: var(--muted); margin-top: 4px; }
+  .card.alert-ok     { border-color: var(--green); }
+  .card.alert-warn   { border-color: var(--amber); }
+  .card.alert-danger { border-color: var(--red);   }
+
+  .chart-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 12px; padding: 20px; margin-bottom: 20px;
+  }
+  .chart-card h2 { font-size: 0.9rem; color: var(--muted); margin-bottom: 16px; }
+  canvas { width: 100% !important; }
+
+  .alarm-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+  .alarm-table th {
+    text-align: left; padding: 8px 12px;
+    color: var(--muted); border-bottom: 1px solid var(--border);
+    font-weight: 500;
+  }
+  .alarm-table td { padding: 10px 12px; border-bottom: 1px solid var(--border); }
+  .alarm-table tr:last-child td { border-bottom: none; }
+  .badge {
+    display: inline-block; padding: 2px 8px; border-radius: 99px;
+    font-size: 0.72rem; font-weight: 600;
+  }
+  .badge-pred  { background: #f59e0b22; color: var(--amber); }
+  .badge-temp  { background: #ef444422; color: var(--red);   }
+  .badge-info  { background: #4f8ef722; color: var(--accent);}
+
+  footer { margin-top: 32px; text-align:center; font-size:0.75rem; color:var(--muted); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="pulse" id="liveDot"></div>
+  <div>
+    <h1>Smart Neonatal Warmer — Predictive Maintenance</h1>
+    <p id="lastUpdate">Loading…</p>
+  </div>
+</header>
+
+<div class="grid">
+  <div class="card" id="cardTemp">
+    <div class="label">Current Temperature</div>
+    <div class="value" id="valTemp">—</div>
+    <div class="sub">Setpoint: 36.5 °C</div>
+  </div>
+  <div class="card" id="cardEffort">
+    <div class="label">PID Effort (24 h mean)</div>
+    <div class="value" id="valEffort">—</div>
+    <div class="sub">7-day baseline: <span id="valBaseline">—</span></div>
+  </div>
+  <div class="card" id="cardDelta">
+    <div class="label">Deviation from Baseline</div>
+    <div class="value" id="valDelta">—</div>
+    <div class="sub">Alert threshold: 20 %</div>
+  </div>
+  <div class="card" id="cardWifi">
+    <div class="label">Connectivity</div>
+    <div class="value" id="valWifi">—</div>
+    <div class="sub" id="subWifi">Last sync</div>
+  </div>
+</div>
+
+<div class="chart-card">
+  <h2>TEMPERATURE (°C) — last 60 readings</h2>
+  <canvas id="chartTemp" height="90"></canvas>
+</div>
+
+<div class="chart-card">
+  <h2>PID EFFORT — last 60 readings (degradation visible as upward trend)</h2>
+  <canvas id="chartEffort" height="90"></canvas>
+</div>
+
+<div class="chart-card">
+  <h2>RECENT ALARMS</h2>
+  <table class="alarm-table">
+    <thead>
+      <tr>
+        <th>Time</th><th>Type</th><th>Device</th><th>Message</th>
+      </tr>
+    </thead>
+    <tbody id="alarmBody">
+      <tr><td colspan="4" style="color:var(--muted);padding:20px">Loading alarms…</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<footer>
+  AR/XR-Enabled Remote Engineering Framework · Smart Neonatal Warmer ·
+  Dept of Biomedical Engineering, University of Ilorin
+</footer>
+
+<!-- Lightweight chart library (no npm needed) -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+const SUPABASE_URL = "https://txfoiqripjnfoanwwahl.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR4Zm9pcXJpcGpuZm9hbnd3YWhsIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NTI4ODYyMSwiZXhwIjoyMDkwODY0NjIxfQ.jsQ888X3w38NFQDhhVlYQs54ZI7dr0QmifZbCjUreA4";
+const DEVICE_ID   = "0ca6ebba-167e-4fdd-80ad-b7d58df3f930";
+
+const HDR = { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` };
+
+async function query(path) {
+  const r = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, { headers: HDR });
+  return r.json();
+}
+
+// ── Chart setup ───────────────────────────────────────────────────────────────
+function makeChart(id, label, color) {
+  return new Chart(document.getElementById(id), {
+    type: "line",
+    data: {
+      labels: [],
+      datasets: [{
+        label, data: [], borderColor: color,
+        backgroundColor: color + "18", borderWidth: 2,
+        pointRadius: 0, tension: 0.4, fill: true,
+      }]
+    },
+    options: {
+      responsive: true, animation: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { ticks: { color: "#64748b", maxTicksLimit: 8 }, grid: { color: "#2a2d3e" } },
+        y: { ticks: { color: "#64748b" }, grid: { color: "#2a2d3e" } },
+      }
+    }
+  });
+}
+
+const chartTemp   = makeChart("chartTemp",   "Temperature °C", "#4f8ef7");
+const chartEffort = makeChart("chartEffort", "PID Effort",     "#f59e0b");
+
+function updateChart(chart, rows, field) {
+  chart.data.labels         = rows.map(r => r.recorded_at.slice(11, 19));
+  chart.data.datasets[0].data = rows.map(r => r[field]);
+  chart.update();
+}
+
+// ── Status card colour ────────────────────────────────────────────────────────
+function setCardState(cardId, value, threshold, invert = false) {
+  const el = document.getElementById(cardId);
+  el.classList.remove("alert-ok", "alert-warn", "alert-danger");
+  const over = invert ? value < threshold : value > threshold;
+  el.classList.add(over ? "alert-danger" : "alert-ok");
+}
+
+// ── Main refresh ──────────────────────────────────────────────────────────────
+async function refresh() {
+  // Latest 60 telemetry rows
+  const rows = await query(
+    `telemetry?device_id=eq.${DEVICE_ID}&order=recorded_at.desc&limit=60&select=*`
+  );
+  if (!rows || !rows.length) return;
+
+  const latest = rows[0];
+
+  // Current temp
+  document.getElementById("valTemp").textContent = latest.temperature_c.toFixed(2) + " °C";
+  setCardState("cardTemp", Math.abs(latest.temperature_c - 36.5), 0.5);
+
+  // Wi-Fi
+  document.getElementById("valWifi").textContent = latest.wifi_connected ? "ONLINE" : "OFFLINE";
+  document.getElementById("valWifi").style.color = latest.wifi_connected ? "var(--green)" : "var(--red)";
+
+  // 24h mean effort
+  const now24 = new Date(Date.now() - 86400000).toISOString();
+  const recent = await query(
+    `telemetry?device_id=eq.${DEVICE_ID}&recorded_at=gte.${now24}&select=pid_effort`
+  );
+  const mean24 = recent.reduce((s, r) => s + r.pid_effort, 0) / (recent.length || 1);
+
+  // 7-day baseline
+  const now7d = new Date(Date.now() - 7 * 86400000).toISOString();
+  const hist = await query(
+    `telemetry?device_id=eq.${DEVICE_ID}&recorded_at=gte.${now7d}&select=pid_effort`
+  );
+  const baseline = hist.reduce((s, r) => s + r.pid_effort, 0) / (hist.length || 1);
+
+  const delta = baseline > 0 ? ((mean24 - baseline) / baseline) * 100 : 0;
+
+  document.getElementById("valEffort").textContent  = mean24.toFixed(1);
+  document.getElementById("valBaseline").textContent = baseline.toFixed(1);
+  document.getElementById("valDelta").textContent   = delta.toFixed(1) + " %";
+  document.getElementById("valDelta").style.color   =
+    delta > 20 ? "var(--red)" : delta > 10 ? "var(--amber)" : "var(--green)";
+
+  setCardState("cardDelta", delta, 20);
+  setCardState("cardEffort", mean24, baseline * 1.2);
+
+  // Charts (reverse so oldest is left)
+  const sorted = [...rows].reverse();
+  updateChart(chartTemp,   sorted, "temperature_c");
+  updateChart(chartEffort, sorted, "pid_effort");
+
+  // Alarms
+  const alarms = await query(
+    `alarm_system?order=created_at.desc&limit=10&select=*`
+  );
+  const tbody = document.getElementById("alarmBody");
+  if (!alarms || !alarms.length) {
+    tbody.innerHTML = `<tr><td colspan="4" style="color:var(--muted);padding:20px">No alarms recorded.</td></tr>`;
+  } else {
+    tbody.innerHTML = alarms.map(a => {
+      const t    = new Date(a.created_at).toLocaleString();
+      const type = a.alarm_type || "INFO";
+      const badge =
+        type.includes("PREDICT") ? "badge-pred" :
+        type.includes("TEMP")    ? "badge-temp" : "badge-info";
+      return `<tr>
+        <td>${t}</td>
+        <td><span class="badge ${badge}">${type}</span></td>
+        <td style="font-size:0.75rem;color:var(--muted)">${(a.device_id||"").slice(0,8)}…</td>
+        <td>${a.message || "—"}</td>
+      </tr>`;
+    }).join("");
+  }
+
+  document.getElementById("lastUpdate").textContent =
+    "Last updated: " + new Date().toLocaleTimeString();
+}
+
+// Run immediately then every 10 seconds
+refresh();
+setInterval(refresh, 10000);
+</script>
+</body>
+</html>
