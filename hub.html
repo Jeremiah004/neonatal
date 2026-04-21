@@ -1,0 +1,1018 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
+<meta name="theme-color" content="#0D1117"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<title>NeoWatch Training Hub</title>
+<style>
+/* ════════════════════════════════════════════════════════════
+   DESIGN TOKENS — change these to retheme the entire app
+   ════════════════════════════════════════════════════════════ */
+:root{
+  --bg:          #0D1117;
+  --surface:     #161B22;
+  --surface2:    #21262D;
+  --border:      #30363D;
+  --text:        #E6EDF3;
+  --muted:       #8B949E;
+  --green:       #3FB950;
+  --green-dim:   #56D36420;
+  --green-bdr:   #3FB95040;
+  --blue:        #388BFD;
+  --blue-dim:    #388BFD18;
+  --blue-bdr:    #388BFD44;
+  --red:         #F85149;
+  --red-dim:     #F8514918;
+  --red-bdr:     #F8514944;
+  --amber:       #D29922;
+  --amber-dim:   #D2992218;
+  --amber-bdr:   #D2992244;
+  --purple:      #BC8CFF;
+  --purple-dim:  #BC8CFF15;
+  --radius:      10px;
+  --nav-h:       64px;
+  --mono:        'Courier New', monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);
+          font-family:'Segoe UI',system-ui,-apple-system,sans-serif;}
+
+/* ── LAYOUT ── */
+#app{display:flex;flex-direction:column;height:100vh;max-width:480px;margin:0 auto;
+     position:relative;overflow:hidden;}
+
+/* ── HEADER ── */
+.app-header{background:var(--surface);border-bottom:1px solid var(--border);
+            padding:.7rem 1rem;display:flex;align-items:center;
+            justify-content:space-between;flex-shrink:0;z-index:10;}
+.logo{display:flex;align-items:center;gap:.5rem;}
+.logo-pulse{width:9px;height:9px;border-radius:50%;background:var(--green);
+            box-shadow:0 0 6px var(--green);animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(1.4)}}
+.logo-text{font-size:.95rem;font-weight:700;letter-spacing:.02em;}
+.logo-sub{font-size:.58rem;color:var(--muted);font-family:var(--mono);}
+.header-badge{font-family:var(--mono);font-size:.62rem;background:var(--surface2);
+              border:1px solid var(--border);color:var(--muted);
+              padding:.2rem .55rem;border-radius:20px;}
+
+/* ── PAGE CONTAINER ── */
+#pages{flex:1;overflow:hidden;position:relative;}
+.page{position:absolute;inset:0;overflow-y:auto;padding:1rem 1rem calc(var(--nav-h)+1rem);
+      display:none;-webkit-overflow-scrolling:touch;}
+.page.active{display:block;}
+
+/* ── BOTTOM NAV ── */
+.bottom-nav{height:var(--nav-h);background:var(--surface);border-top:1px solid var(--border);
+            display:flex;align-items:stretch;flex-shrink:0;z-index:10;}
+.nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+         gap:3px;background:none;border:none;cursor:pointer;color:var(--muted);
+         font-size:.55rem;font-weight:600;letter-spacing:.04em;text-transform:uppercase;
+         transition:color .2s;padding:.3rem 0;-webkit-tap-highlight-color:transparent;}
+.nav-btn.active{color:var(--green);}
+.nav-icon{font-size:1.25rem;line-height:1;}
+
+/* ── SECTION HEADER ── */
+.section-header{margin-bottom:1rem;}
+.section-title{font-size:1.1rem;font-weight:700;margin-bottom:.25rem;}
+.section-sub{font-size:.75rem;color:var(--muted);line-height:1.5;}
+
+/* ── CARDS ── */
+.card{background:var(--surface);border:1px solid var(--border);
+      border-radius:var(--radius);margin-bottom:.7rem;overflow:hidden;
+      transition:border-color .2s;}
+.card:active{border-color:var(--green);}
+.card-header{display:flex;align-items:center;justify-content:space-between;
+             padding:.8rem 1rem;cursor:pointer;}
+.card-left{display:flex;align-items:center;gap:.6rem;}
+.card-icon{width:34px;height:34px;border-radius:8px;display:flex;align-items:center;
+           justify-content:center;font-size:1.1rem;flex-shrink:0;}
+.card-name{font-size:.88rem;font-weight:600;}
+.card-code{font-size:.62rem;color:var(--muted);font-family:var(--mono);margin-top:1px;}
+.card-chevron{color:var(--muted);font-size:.8rem;transition:transform .25s;}
+.card.open .card-chevron{transform:rotate(180deg);}
+.card-body{display:none;padding:0 1rem 1rem;border-top:1px solid var(--border);}
+.card.open .card-body{display:block;}
+.info-row{margin-top:.8rem;}
+.info-label{font-size:.6rem;font-weight:700;color:var(--muted);letter-spacing:.12em;
+            text-transform:uppercase;margin-bottom:.3rem;}
+.info-text{font-size:.78rem;color:#C9D1D9;line-height:1.65;}
+.cost-pill{display:inline-block;background:var(--green-dim);border:1px solid var(--green-bdr);
+           color:var(--green);font-family:var(--mono);font-size:.68rem;
+           padding:.2rem .55rem;border-radius:4px;margin-top:.4rem;}
+.fail-text{color:var(--red);font-size:.78rem;line-height:1.6;}
+
+/* ── REPLACE PAGE ── */
+.comp-select-grid{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin-bottom:1rem;}
+.comp-pick{background:var(--surface);border:1px solid var(--border);border-radius:8px;
+           padding:.6rem .5rem;text-align:center;cursor:pointer;transition:all .2s;}
+.comp-pick:active,.comp-pick.selected{border-color:var(--green);background:var(--green-dim);}
+.comp-pick-icon{font-size:1.3rem;margin-bottom:3px;}
+.comp-pick-name{font-size:.65rem;font-weight:600;color:var(--muted);}
+.comp-pick.selected .comp-pick-name{color:var(--green);}
+
+.replace-panel{background:var(--surface);border:1px solid var(--border);
+               border-radius:var(--radius);overflow:hidden;display:none;}
+.replace-panel.show{display:block;}
+.replace-header{background:var(--surface2);padding:.8rem 1rem;
+                border-bottom:1px solid var(--border);}
+.replace-comp-name{font-size:.95rem;font-weight:700;}
+.tools-section{padding:.8rem 1rem;border-bottom:1px solid var(--border);}
+.tools-label{font-size:.6rem;font-weight:700;color:var(--muted);letter-spacing:.1em;
+             text-transform:uppercase;margin-bottom:.5rem;}
+.tools-flex{display:flex;flex-wrap:wrap;gap:.3rem;}
+.tool-tag{background:var(--blue-dim);border:1px solid var(--blue-bdr);color:var(--blue);
+          font-size:.65rem;padding:.2rem .5rem;border-radius:3px;}
+.step-section{padding:.8rem 1rem;}
+.step-item{display:flex;gap:.7rem;margin-bottom:.9rem;align-items:flex-start;}
+.step-num-badge{width:24px;height:24px;border-radius:50%;background:var(--green);
+                color:#0D1117;font-size:.72rem;font-weight:700;flex-shrink:0;
+                display:flex;align-items:center;justify-content:center;}
+.step-content{}
+.step-title{font-size:.82rem;font-weight:600;margin-bottom:.2rem;}
+.step-body{font-size:.75rem;color:var(--muted);line-height:1.6;}
+
+/* ── DIAGNOSTIC ENGINE ── */
+.fault-tabs{display:flex;gap:.4rem;overflow-x:auto;padding-bottom:.4rem;
+            margin-bottom:.9rem;scrollbar-width:none;}
+.fault-tabs::-webkit-scrollbar{display:none;}
+.fault-tab{flex-shrink:0;padding:.4rem .85rem;border-radius:20px;
+           font-size:.72rem;font-weight:600;cursor:pointer;
+           background:var(--surface);border:1px solid var(--border);
+           color:var(--muted);transition:all .2s;white-space:nowrap;}
+.fault-tab.active{background:var(--red-dim);border-color:var(--red);color:var(--red);}
+
+.scenario-card{background:var(--surface);border:1px solid var(--border);
+               border-radius:var(--radius);overflow:hidden;display:none;}
+.scenario-card.show{display:block;}
+.scenario-banner{background:var(--red-dim);border-bottom:1px solid var(--red-bdr);
+                 padding:.8rem 1rem;}
+.scenario-type{font-size:.6rem;font-weight:700;color:var(--red);letter-spacing:.12em;
+               text-transform:uppercase;margin-bottom:.3rem;}
+.scenario-title{font-size:.95rem;font-weight:700;color:var(--text);}
+
+.readings-grid{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;
+               padding:.8rem 1rem;border-bottom:1px solid var(--border);}
+.reading-box{background:var(--surface2);border:1px solid var(--border);
+             border-radius:8px;padding:.55rem .7rem;}
+.reading-label{font-size:.58rem;color:var(--muted);font-family:var(--mono);
+               text-transform:uppercase;letter-spacing:.08em;}
+.reading-val{font-family:var(--mono);font-size:1.1rem;font-weight:700;margin-top:2px;}
+.reading-val.ok{color:var(--green);}
+.reading-val.warn{color:var(--amber);}
+.reading-val.bad{color:var(--red);}
+
+.diag-section{padding:.8rem 1rem;border-bottom:1px solid var(--border);}
+.diag-label{font-size:.6rem;font-weight:700;color:var(--muted);letter-spacing:.12em;
+            text-transform:uppercase;margin-bottom:.4rem;}
+.diag-text{font-size:.78rem;color:#C9D1D9;line-height:1.65;}
+
+.reveal-btn{margin:1rem;width:calc(100% - 2rem);padding:.7rem;border-radius:8px;
+            border:1.5px solid var(--green-bdr);background:var(--green-dim);
+            color:var(--green);font-size:.82rem;font-weight:700;cursor:pointer;}
+.fix-section{display:none;padding:.8rem 1rem;background:var(--green-dim);
+             border-top:1px solid var(--green-bdr);}
+.fix-section.show{display:block;}
+.fix-label{font-size:.6rem;font-weight:700;color:var(--green);letter-spacing:.12em;
+           text-transform:uppercase;margin-bottom:.5rem;}
+.fix-step{display:flex;gap:.6rem;margin-bottom:.6rem;font-size:.78rem;}
+.fix-step-num{color:var(--green);font-weight:700;font-family:var(--mono);flex-shrink:0;}
+.fix-step-text{color:#C9D1D9;line-height:1.55;}
+
+/* ── AI COPILOT ── */
+.copilot-context{background:var(--blue-dim);border:1px solid var(--blue-bdr);
+                 border-radius:8px;padding:.7rem .9rem;margin-bottom:.9rem;
+                 font-size:.75rem;color:var(--blue);line-height:1.55;}
+.copilot-context strong{display:block;margin-bottom:.2rem;font-size:.78rem;}
+
+.chat-window{background:var(--surface);border:1px solid var(--border);
+             border-radius:var(--radius);min-height:280px;max-height:380px;
+             overflow-y:auto;padding:.8rem;margin-bottom:.7rem;display:flex;
+             flex-direction:column;gap:.7rem;-webkit-overflow-scrolling:touch;}
+.msg{max-width:85%;border-radius:10px;padding:.6rem .8rem;font-size:.78rem;line-height:1.6;}
+.msg.user{align-self:flex-end;background:var(--green);color:#0D1117;
+          border-bottom-right-radius:3px;font-weight:500;}
+.msg.ai{align-self:flex-start;background:var(--surface2);border:1px solid var(--border);
+        color:var(--text);border-bottom-left-radius:3px;}
+.msg.thinking{color:var(--muted);font-style:italic;border-style:dashed;}
+.chat-welcome{text-align:center;color:var(--muted);font-size:.78rem;
+              padding:2rem 1rem;line-height:1.7;}
+.chat-welcome-icon{font-size:2rem;margin-bottom:.5rem;}
+
+.quick-prompts{display:flex;flex-direction:column;gap:.4rem;margin-bottom:.7rem;}
+.quick-btn{background:var(--surface);border:1px solid var(--border);
+           border-radius:8px;padding:.55rem .8rem;text-align:left;
+           font-size:.72rem;color:var(--muted);cursor:pointer;transition:all .15s;}
+.quick-btn:active{border-color:var(--blue);color:var(--blue);background:var(--blue-dim);}
+
+.chat-input-row{display:flex;gap:.5rem;}
+.chat-input{flex:1;background:var(--surface);border:1.5px solid var(--border);
+            border-radius:8px;padding:.6rem .8rem;color:var(--text);font-size:.82rem;
+            outline:none;transition:border-color .2s;}
+.chat-input:focus{border-color:var(--blue);}
+.chat-send{background:var(--blue);border:none;border-radius:8px;padding:.6rem .9rem;
+           color:#fff;font-size:.82rem;font-weight:700;cursor:pointer;flex-shrink:0;}
+.chat-send:disabled{opacity:.4;cursor:default;}
+
+/* ── 3D FIELD PAGE ── */
+.threejs-slot{background:var(--surface);border:2px dashed var(--border);
+              border-radius:var(--radius);min-height:300px;display:flex;
+              flex-direction:column;align-items:center;justify-content:center;
+              text-align:center;padding:2rem;margin-bottom:1rem;}
+.slot-icon{font-size:3rem;margin-bottom:.8rem;opacity:.5;}
+.slot-title{font-size:.95rem;font-weight:700;margin-bottom:.4rem;color:var(--muted);}
+.slot-desc{font-size:.75rem;color:var(--muted);line-height:1.6;max-width:280px;}
+.slot-badge{margin-top:.8rem;font-size:.65rem;font-family:var(--mono);
+            background:var(--purple-dim);border:1px solid var(--purple);
+            color:var(--purple);padding:.25rem .6rem;border-radius:4px;}
+
+.launch-3d-btn{width:100%;padding:.85rem;border-radius:8px;border:none;
+               background:var(--green);color:#0D1117;font-size:.9rem;
+               font-weight:700;cursor:pointer;margin-bottom:.7rem;}
+
+/* ── OFFLINE TOAST ── */
+.toast{position:fixed;bottom:calc(var(--nav-h)+12px);left:50%;transform:translateX(-50%) translateY(20px);
+       background:var(--amber);color:#0D1117;padding:.5rem 1rem;border-radius:20px;
+       font-size:.75rem;font-weight:700;opacity:0;transition:all .3s;z-index:50;white-space:nowrap;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+</style>
+</head>
+<body>
+
+<div id="app">
+
+  <!-- ── HEADER ─────────────────────────────────────────────────────────── -->
+  <header class="app-header">
+    <div class="logo">
+      <div class="logo-pulse"></div>
+      <div>
+        <div class="logo-text">NeoWatch</div>
+        <div class="logo-sub">Training Hub · 20/30GP030</div>
+      </div>
+    </div>
+    <div class="header-badge" id="offlineBadge">● LIVE</div>
+  </header>
+
+  <!-- ── PAGE CONTAINER ─────────────────────────────────────────────────── -->
+  <div id="pages">
+
+    <!-- ═══════════════════════════════════════════════════════════
+         PAGE 1 — DIGITAL ANATOMY
+         ═══════════════════════════════════════════════════════════ -->
+    <div class="page active" id="page-anatomy">
+      <div class="section-header">
+        <div class="section-title">Digital Anatomy</div>
+        <div class="section-sub">Tap any component to see its role, engineering justification, and failure behaviour.</div>
+      </div>
+      <div id="anatomy-list"></div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         PAGE 2 — REPLACE GUIDE
+         ═══════════════════════════════════════════════════════════ -->
+    <div class="page" id="page-replace">
+      <div class="section-header">
+        <div class="section-title">Replace Guide</div>
+        <div class="section-sub">Select a component below to see the full step-by-step replacement procedure.</div>
+      </div>
+      <div class="comp-select-grid" id="replaceGrid"></div>
+      <div class="replace-panel" id="replacePanel">
+        <div class="replace-header">
+          <div class="replace-comp-name" id="rp-name">—</div>
+        </div>
+        <div class="tools-section">
+          <div class="tools-label">Tools required</div>
+          <div class="tools-flex" id="rp-tools"></div>
+        </div>
+        <div class="step-section" id="rp-steps"></div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         PAGE 3 — DIAGNOSTIC ENGINE
+         ═══════════════════════════════════════════════════════════ -->
+    <div class="page" id="page-diagnose">
+      <div class="section-header">
+        <div class="section-title">Diagnostic Engine</div>
+        <div class="section-sub">Select a fault scenario. Study the readings, identify the root cause, then reveal the fix.</div>
+      </div>
+      <div class="fault-tabs" id="faultTabs"></div>
+      <div id="scenarioContainer"></div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         PAGE 4 — AI CO-PILOT
+         ═══════════════════════════════════════════════════════════ -->
+    <div class="page" id="page-ai">
+      <div class="section-header">
+        <div class="section-title">AI Diagnostic Co-Pilot</div>
+        <div class="section-sub">Describe any symptom and the Co-Pilot will guide you through the diagnosis — powered by Claude AI.</div>
+      </div>
+
+      <div class="copilot-context">
+        <strong>Context loaded: Smart Neonatal Warmer NW-001</strong>
+        The Co-Pilot knows your system's architecture, component specs, clinical thresholds, and failure modes. Ask anything.
+      </div>
+
+      <div class="quick-prompts">
+        <button class="quick-btn" onclick="quickPrompt(this)">💡 The baby feels cold but the warmer shows 36°C</button>
+        <button class="quick-btn" onclick="quickPrompt(this)">💡 PID is at 100% but temperature keeps falling</button>
+        <button class="quick-btn" onclick="quickPrompt(this)">💡 Temperature is rising even though I turned the device off</button>
+        <button class="quick-btn" onclick="quickPrompt(this)">💡 The LCD is blank but the buzzer is working</button>
+      </div>
+
+      <div class="chat-window" id="chatWindow">
+        <div class="chat-welcome">
+          <div class="chat-welcome-icon">🤖</div>
+          Type a symptom below or tap a quick prompt above.<br><br>
+          The Co-Pilot understands your warmer's full architecture and will guide you to the root cause.
+        </div>
+      </div>
+
+      <div class="chat-input-row">
+        <input class="chat-input" id="chatInput" type="text"
+               placeholder="Describe the symptom..." autocomplete="off"/>
+        <button class="chat-send" id="sendBtn" onclick="sendMessage()">Send</button>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         PAGE 5 — 3D FIELD
+         ═══════════════════════════════════════════════════════════ -->
+    <div class="page" id="page-3d">
+      <div class="section-header">
+        <div class="section-title">3D Field Training</div>
+        <div class="section-sub">Rotate the warmer, tap components, and diagnose faults in 3D space.</div>
+      </div>
+
+      <button class="launch-3d-btn" onclick="launch3D()">Launch 3D Field →</button>
+
+      <div class="threejs-slot" id="threejsSlot">
+        <div class="slot-icon">🔬</div>
+        <div class="slot-title">3D Scene mounts here</div>
+        <div class="slot-desc">
+          The Three.js 3D scene from <code>06_ar_training.html</code> is structured to plug directly into this slot.
+          Tap the button above to open it in full screen.
+        </div>
+        <div class="slot-badge">THREE.JS READY SLOT</div>
+      </div>
+
+      <div class="card">
+        <div class="card-header" onclick="toggleCard(this)">
+          <div class="card-left">
+            <div class="card-icon" style="background:#BC8CFF20">🏗️</div>
+            <div>
+              <div class="card-name">How to plug in the 3D scene</div>
+              <div class="card-code">Developer note</div>
+            </div>
+          </div>
+          <div class="card-chevron">▼</div>
+        </div>
+        <div class="card-body">
+          <div class="info-text">
+            Replace the <code style="color:var(--green)">#threejsSlot</code> div with the Three.js canvas from <code>06_ar_training.html</code>.
+            Move the Three.js script and component data into this file's script block.
+            The bottom navigation and panel system in this file will serve as the wrapper.
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /pages -->
+
+  <!-- ── BOTTOM NAVIGATION ───────────────────────────────────────────────── -->
+  <nav class="bottom-nav">
+    <button class="nav-btn active" onclick="navigate('anatomy',this)">
+      <span class="nav-icon">🧬</span><span>Anatomy</span>
+    </button>
+    <button class="nav-btn" onclick="navigate('replace',this)">
+      <span class="nav-icon">🔧</span><span>Replace</span>
+    </button>
+    <button class="nav-btn" onclick="navigate('diagnose',this)">
+      <span class="nav-icon">⚡</span><span>Diagnose</span>
+    </button>
+    <button class="nav-btn" onclick="navigate('ai',this)">
+      <span class="nav-icon">🤖</span><span>Co-Pilot</span>
+    </button>
+    <button class="nav-btn" onclick="navigate('3d',this)">
+      <span class="nav-icon">🔬</span><span>3D Field</span>
+    </button>
+  </nav>
+
+</div><!-- /app -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ════════════════════════════════════════════════════════════════════════════
+//  DATA — all component, replacement, and fault data lives here.
+//  This is the "single source of truth" — change anything here and it
+//  updates across Anatomy, Replace, and Diagnostic pages automatically.
+// ════════════════════════════════════════════════════════════════════════════
+
+const COMPONENTS = [
+  {
+    id:'esp32', icon:'🧠', color:'#6E40C9',
+    name:'ESP32-WROOM-32', code:'Espressif Systems — Dual-Core 240 MHz',
+    role:'The central microcontroller. Runs the PID temperature control algorithm on Core 0 and handles Wi-Fi, MQTT, SD card, LCD, and buzzer management on Core 1. The dual-core design is essential: if both tasks shared one core, a Wi-Fi timeout could stall the PID loop, leaving the heater at its last duty cycle — dangerous for a neonate.',
+    why:'Boots in under 2 seconds after power loss. Native Wi-Fi and Bluetooth — no external module needed. Hardware watchdog timer auto-resets the device if firmware crashes. 520 KB SRAM handles all concurrent tasks. Costs NGN 4,500 versus NGN 25,000+ for equivalent STM32 + Wi-Fi module setup.',
+    fails:'If the device shows no display and no response, check 5V from the buck converter first. GPIO pins can be damaged by electrostatic discharge — always ground yourself. Serial monitor showing repeated resets indicates watchdog timeout — check for infinite loops in firmware.',
+    cost:'NGN 4,500',
+    tools:['M3 screwdriver','multimeter','USB cable','laptop + PlatformIO'],
+    steps:[
+      {t:'Power down completely',b:'Disconnect 12V battery terminal. Confirm 0V on ESP32 VIN pin. Wait 30 seconds for capacitors to discharge.'},
+      {t:'Photograph all wiring',b:'Take a clear photo of all GPIO connections before removing anything. Label unlabelled wires with tape.'},
+      {t:'Remove peripherals first',b:'Disconnect DS18B20 wire (GPIO4), SSR control (GPIO5), SD card SPI wires, LCD I2C (GPIO21/22), buzzer (GPIO2).'},
+      {t:'Remove power pins last',b:'Disconnect VIN (5V) and GND. Slide or unsolder ESP32 module from its position.'},
+      {t:'Flash firmware before fitting',b:'Flash firmware onto replacement ESP32 using PlatformIO. Verify it boots and prints to Serial at 115200 baud.'},
+      {t:'Reconnect and verify',b:'Connect power first, then peripherals in reverse order. Open Serial monitor and confirm all modules initialise.'},
+    ],
+  },
+  {
+    id:'ds18b20', icon:'🌡️', color:'#2DA44E',
+    name:'DS18B20 × 2', code:'Maxim Integrated — 1-Wire — 12-bit Resolution',
+    role:'Two sensors are installed: one measures neonatal skin temperature (the PID input) and one measures ambient enclosure temperature (reference). They share a single data wire using the 1-Wire protocol. Each has a unique 64-bit ROM address so the ESP32 addresses them individually on the same bus.',
+    why:'Accurate to ±0.5°C — IEC 60601-2-21 requires ≤ ±0.5°C. 12-bit resolution gives 0.0625°C steps. Digital output eliminates ADC drift. Waterproof stainless steel probe variant is suitable for direct skin contact. Cost: NGN 800 each.',
+    fails:'Returns -127°C if disconnected — firmware detects this as a CRC error and disables heater. Returns 85°C on first power-up (normal, wait 1 second). Erratic readings: check the 4.7kΩ pull-up resistor to 3.3V. Broken data wire is the most common physical failure.',
+    cost:'NGN 800 each',
+    tools:['Multimeter','sensor scanner sketch','isopropyl alcohol','USB cable'],
+    steps:[
+      {t:'Identify which sensor failed',b:'Check Serial monitor — firmware logs which ROM address returned an error. Photograph cable routing before removal.'},
+      {t:'Disconnect data wire from GPIO4',b:'The data wire connects to ESP32 GPIO4 through the 4.7kΩ pull-up resistor on the 1-Wire bus.'},
+      {t:'Remove the sensor',b:'If probe-type: unscrew mounting bracket. If surface-mounted: carefully desolder. Note probe length and routing.'},
+      {t:'Find new sensor ROM address',b:'Connect replacement to bus. Run a 1-Wire scanner sketch — it prints the unique 64-bit address. Update SENSOR_SKIN_ADDR or SENSOR_AMB_ADDR in config.h.'},
+      {t:'Test before closing',b:'Power on. Serial monitor should show both sensor addresses found and temperatures within plausible range.'},
+    ],
+  },
+  {
+    id:'ssr', icon:'⚡', color:'#DA3633',
+    name:'SSR-40DA', code:'Solid State Relay — 3–32V DC ctrl / 24–380V AC load',
+    role:'Acts as the power switch between the ESP32 control signal and the heater element. GPIO5 outputs a PWM signal (0–3.3V). When PWM is high, the SSR closes and full voltage reaches the heater. No moving parts — switches silently without arc or wear.',
+    why:'Rated 40A — far above the 8A the 100W heater draws, giving large safety margin. DC control input 3–32V is compatible with 3.3V GPIO. Zero-crossing switching reduces electromagnetic interference in the clinical environment. Rated for 100 million operations versus 1 million for mechanical relay.',
+    fails:'Open failure: SSR does not close — heater stays off, PID hits 100%, THERMAL LOW alarm fires. Closed failure (dangerous): SSR shorts permanently — heater stays on even with 0% control signal, temperature rises toward bimetal cutoff. The second failure mode is an emergency: cut all power immediately.',
+    cost:'NGN 3,500',
+    tools:['M4 screwdriver','multimeter','thermal paste','replacement SSR-40DA'],
+    steps:[
+      {t:'EMERGENCY: if SSR is shorted',b:'If PID=0% and temperature still rises, cut all power immediately. Move patient. Do not wait for the bimetal cutoff.'},
+      {t:'Confirm fault mode with multimeter',b:'Power off. Check load terminals: near-zero ohms with no signal = shorted. Open circuit with signal present = open failure.'},
+      {t:'Photograph load wiring',b:'Load wires carry high current. Photograph and label before disconnecting. Note Load+ and Load− orientation.'},
+      {t:'Disconnect load then control wires',b:'Loosen load terminal screws first, then control terminal screws. Remove heater wires before ESP32 wires.'},
+      {t:'Apply thermal paste and mount',b:'Apply thermal paste between SSR and heatsink. Bolt in place firmly — poor thermal contact causes premature failure.'},
+      {t:'Test with multimeter before connecting heater',b:'Apply 3.3V to control+. Verify load terminals close. Only then reconnect heater element.'},
+    ],
+  },
+  {
+    id:'heater', icon:'🔥', color:'#E36209',
+    name:'Nichrome Heater Element', code:'100W — 12V DC — Resistance Wire',
+    role:'Converts electrical power to heat. The PID controller varies the duty cycle (0–100%) to control heat output precisely. At 18% duty cycle (typical steady-state), 18W is produced. At 100%, the full 100W is produced. The element is coiled to maximise surface area for heat distribution.',
+    why:'Nichrome (nickel-chromium) has stable resistance that changes minimally with temperature — critical for PID accuracy. High melting point (1400°C) and oxidation resistance. 12V DC eliminates need for mains AC wiring inside the prototype, reducing safety risk and regulatory complexity.',
+    fails:'Resistance increases as wire ages (oxidises internally) — produces less heat per watt, PID compensates with higher duty cycle — exactly what predictive maintenance monitors. Complete failure: wire breaks, resistance reads infinite (open circuit). Confirm with multimeter: healthy 100W 12V element reads approximately 1.44Ω.',
+    cost:'NGN 1,200',
+    tools:['Multimeter','heat-resistant gloves','M3 screwdriver','replacement element'],
+    steps:[
+      {t:'Power down and wait 2 minutes to cool',b:'The element retains heat after power off. Do not touch until cooled. Confirm 0V across heater terminals.'},
+      {t:'Measure resistance of old element',b:'A healthy 100W 12V element reads ≈1.44Ω. Values above 2Ω confirm degradation consistent with predictive maintenance alert.'},
+      {t:'Disconnect both heater terminals',b:'Note which terminal connects to SSR Load− and which to bimetal cutoff. Label before removing.'},
+      {t:'Remove element from mounting',b:'Slide out of bracket. Ensure replacement has identical wattage and voltage rating. Coil must not touch enclosure walls.'},
+      {t:'Verify before powering on',b:'Check replacement reads ≈1.44Ω and has no short to chassis ground. Reconnect in original orientation.'},
+    ],
+  },
+  {
+    id:'bimetal', icon:'🛡️', color:'#D29922',
+    name:'Bimetal Cutoff Switch', code:'38.5°C N/C — Hardware Safety — IEC 60601-2-21',
+    role:'A purely mechanical safety device wired in series with the heater element. Below 38.5°C it is closed — current flows normally. Above 38.5°C, the bimetal strip bends due to differential thermal expansion and physically breaks the circuit. This operates completely independently of all firmware and software.',
+    why:'Required by IEC 60601-2-21: the international standard for infant radiant warmers mandates a hardware thermal cutoff independent of the microcontroller. Microcontrollers can fail, firmware can crash, and SSRs can short — this device provides a last-resort protection layer that no software failure can bypass.',
+    fails:'Open failure after repeated thermal cycling: reads open circuit at room temperature even though it should be closed. Resistance should read near-zero ohms at room temperature. Replace every 5 years as a preventive measure. Some variants require manual reset after tripping — look for a small red button.',
+    cost:'NGN 600',
+    tools:['Multimeter','M2 screwdriver','replacement 38.5°C N/C bimetal thermostat'],
+    steps:[
+      {t:'Test at room temperature',b:'Should read near-zero ohms (closed circuit). If reads open at room temp: has tripped or failed. Allow device to cool fully first.'},
+      {t:'Attempt manual reset',b:'Some bimetal switches have a small reset button. With device cooled below 25°C, press reset button firmly. Retest with multimeter.'},
+      {t:'Replace if failed open permanently',b:'Disconnect bimetal from heater circuit. Replace with identical trip temperature (38.5°C) and current rating. Wire in series with heater.'},
+      {t:'Verify correct installation',b:'Confirm bimetal is in series — not parallel — with heater element. Wrong wiring bypasses the safety function entirely.'},
+    ],
+  },
+  {
+    id:'sdcard', icon:'💾', color:'#1F6FEB',
+    name:'SD Card Module', code:'SPI Interface — FAT32 — Store-and-Forward Buffer',
+    role:'Provides persistent local storage for the Store-and-Forward system. Every telemetry reading is written to the SD card regardless of Wi-Fi availability. Stored as JSON Lines (one record per line) in telemetry.jsonl. When connectivity restores, firmware reads the backlog and uploads to Supabase in batches of 50.',
+    why:'Nigerian hospitals have unreliable internet. Without local buffering, entire shifts of patient monitoring data would be lost every time Wi-Fi dropped. FAT32 format is readable on any laptop for emergency data recovery without special software.',
+    fails:'Not detected: check SPI wiring (GPIO18=CLK, GPIO19=MISO, GPIO23=MOSI, GPIO15=CS). Card must be FAT32 — not exFAT or NTFS. Cards fail after many repeated small writes — replace every 2 years. Firmware logs SD failure to Serial but continues operating with only cloud connectivity.',
+    cost:'NGN 500 (module) + NGN 800 (card)',
+    tools:['Laptop','SD card reader','multimeter'],
+    steps:[
+      {t:'Remove and inspect card',b:'Eject card. Check for corrosion on contacts. Clean with isopropyl alcohol on a cotton swab. Try reseating.'},
+      {t:'Test on laptop',b:'Insert into laptop. If not visible in File Explorer, card has failed. If visible, right-click → Properties → confirm FAT32.'},
+      {t:'Format if needed',b:'Windows: right-click card → Format → FAT32 → Quick Format. Create empty telemetry.jsonl file to verify write access.'},
+      {t:'Verify SPI wiring',b:'GPIO18=CLK, GPIO19=MISO, GPIO23=MOSI, GPIO15=CS. A loose CS wire causes the most common initialisation failures.'},
+    ],
+  },
+  {
+    id:'lcd', icon:'📺', color:'#388BFD',
+    name:'LCD 16×2 I2C Display', code:'PCF8574 Backpack — 0x27 — SDA:GPIO21 SCL:GPIO22',
+    role:'Provides the local user interface visible to nurses and technicians at the bedside. Alternates between two screens every 3 seconds: Screen A shows temperature, setpoint, and PID effort; Screen B shows Wi-Fi status, offline buffer count, and alarm state. Ensures the warmer can be monitored even in complete network failure.',
+    why:'The PCF8574 I2C backpack reduces wiring to 4 wires (VCC, GND, SDA, SCL) instead of 7+ wires for parallel operation. Fewer wires means fewer connection failures in a device that may be handled by multiple staff members over years.',
+    fails:'Blank display: check contrast potentiometer (small blue screw on I2C backpack — turn slowly counter-clockwise then clockwise). Garbled characters: check I2C address (try 0x3F if 0x27 fails — update LCD_I2C_ADDR in config.h). No response: verify SDA=GPIO21, SCL=GPIO22.',
+    cost:'NGN 1,500',
+    tools:['Small flathead screwdriver','I2C scanner sketch'],
+    steps:[
+      {t:'Run I2C scanner sketch',b:'Upload I2C scanner to ESP32. Open Serial monitor. It prints the address of all connected I2C devices. Update LCD_I2C_ADDR in config.h if different from 0x27.'},
+      {t:'Adjust contrast potentiometer',b:'Turn the small blue potentiometer on the I2C backpack. Start counter-clockwise (0) then slowly turn clockwise until characters appear.'},
+      {t:'Check SDA and SCL wiring',b:'SDA = GPIO21, SCL = GPIO22. These are the hardware I2C default pins on the ESP32. Swap if accidentally reversed.'},
+      {t:'Replace module if screen damaged',b:'Disconnect 4 wires. Replace entire LCD+backpack assembly. Re-run I2C scanner to confirm address. No recalibration needed.'},
+    ],
+  },
+  {
+    id:'buzzer', icon:'🔔', color:'#8B949E',
+    name:'Active Buzzer', code:'5V DC — GPIO2 via 100Ω — 500ms on/off pattern',
+    role:'Provides the audible alarm when temperature crosses ALARM_HIGH (38°C) or ALARM_LOW (35°C), or when a sensor fault is detected. The intermittent 500ms on/off pattern distinguishes it from continuous background noise. A nurse can silence the buzzer while the alarm condition remains active on the dashboard.',
+    why:'Active buzzer contains its own oscillator — the ESP32 only sets GPIO HIGH or LOW. A passive buzzer would require PWM at the correct frequency, adding firmware complexity. The 100Ω series resistor limits current to a safe level for GPIO2.',
+    fails:'No sound during alarm: check GPIO2 toggles with multimeter in AC mode (should read ~1.6V average). Test buzzer independently by applying 5V directly to its terminals. No sound = buzzer failed. Buzzer active with no alarm: check firmware alarm state in Serial monitor.',
+    cost:'NGN 300',
+    tools:['Multimeter','5V test power supply','replacement 5V active buzzer'],
+    steps:[
+      {t:'Confirm GPIO2 is toggling',b:'During active alarm, measure GPIO2 with multimeter on AC voltage. Should read approximately 1.6V (average of toggling signal).'},
+      {t:'Test buzzer in isolation',b:'Disconnect from circuit. Apply 5V positive to marked (+) pin. Active buzzer sounds immediately. No sound = buzzer has failed.'},
+      {t:'Check 100Ω series resistor',b:'Measure resistance between GPIO2 and buzzer positive terminal. Should read approximately 100Ω. Replace if open circuit.'},
+      {t:'Fit replacement',b:'Observe polarity marking on buzzer body (+). Reconnect with correct orientation. Test alarm triggering in firmware before closing enclosure.'},
+    ],
+  },
+  {
+    id:'buck', icon:'🔌', color:'#1158C7',
+    name:'LM2596 Buck Converter', code:'12V → 5V DC-DC — 3A Rated — Adjustable',
+    role:'Steps down the 12V battery supply to the 5V required by the ESP32, LCD, SD card module, and buzzer. A switching (buck) converter is used instead of a linear regulator because it is far more efficient — a linear regulator would waste the 7V difference entirely as heat, adding unwanted thermal load inside the clinical enclosure.',
+    why:'LM2596 efficiency is 75–90% versus ~40% for a linear regulator at this voltage ratio. In a battery-powered device this directly extends patient monitoring runtime. The trim potentiometer allows precise output adjustment. Does not require a heatsink at normal operating currents.',
+    fails:'Output voltage low or zero: measure input first — if 12V is present, converter has failed. If 12V is absent, the battery or connector has failed. Output ripple causing ESP32 resets: check 1000µF output capacitor for bulging. Converter too hot to touch: load is drawing more current than rated.',
+    cost:'NGN 1,000',
+    tools:['Multimeter (DC voltage)','small screwdriver','replacement LM2596 module'],
+    steps:[
+      {t:'Measure output voltage',b:'Place multimeter probes on output terminals. Target is 5.0V ± 0.1V. If outside range, adjust trim potentiometer while measuring.'},
+      {t:'Confirm input is 12V',b:'Measure input terminals. If 0V: battery or connection has failed — not the converter. Only proceed if input is confirmed 12V.'},
+      {t:'Adjust trim potentiometer',b:'Clockwise typically increases output voltage. Adjust slowly while measuring. Target exactly 5.00V — ESP32 is sensitive to overvoltage.'},
+      {t:'Replace if output is unstable or zero',b:'Note 4 wire connections: Vin+, Vin−, Vout+, Vout−. Replace module. Re-adjust output to 5.0V before connecting any load.'},
+    ],
+  },
+  {
+    id:'battery', icon:'🔋', color:'#6E4E37',
+    name:'12V 7Ah SLA Battery', code:'Sealed Lead Acid — Maintenance-Free — 20hr Rate',
+    role:'Provides backup power during mains electricity failures. At typical operating current (~1.5A), the 7Ah battery provides approximately 4 hours of autonomous operation. The warmer continues with zero interruption during mains-to-battery transition. Charges from the DC jack when mains is available.',
+    why:'SLA batteries are widely available throughout Nigeria and require no special charging circuitry. They tolerate deep discharge better than lithium-ion without permanent damage and pose no fire risk if punctured — important in a clinical environment. The sealed construction eliminates electrolyte spill risk.',
+    fails:'Reduced runtime: capacity degrades after 200–300 charge cycles or 3–5 years. Under 2A load, a healthy 7Ah battery should hold above 11.5V for at least 3 hours. Never discharge below 10.5V — causes permanent sulfation. Swollen case indicates overcharging or internal gas buildup — replace immediately.',
+    cost:'NGN 8,500',
+    tools:['Multimeter','load resistors','SLA smart charger','gloves'],
+    steps:[
+      {t:'Test capacity under load',b:'Fully charge. Apply 2A load (two 12V 24W bulbs in parallel). Time until voltage drops below 11.5V. Should be at least 3 hours for healthy 7Ah.'},
+      {t:'Clean terminals if corroded',b:'Green or white powder = corrosion. Mix 1 teaspoon baking soda in 250ml water. Brush terminals. Rinse with clean water. Dry completely.'},
+      {t:'Disconnect negative terminal first',b:'Always disconnect negative (−) before positive (+) to prevent short circuit sparks near the battery.'},
+      {t:'Fit replacement and initial charge',b:'Connect positive (+) first, then negative (−). Charge for at least 12 hours before first use. Use a dedicated SLA smart charger.'},
+    ],
+  },
+  {
+    id:'mqtt', icon:'📡', color:'#8957E5',
+    name:'MQTT Broker (Cloud)', code:'Mosquitto TLS — Port 8883 — Supabase Integration',
+    role:'The MQTT broker acts as the message hub between the ESP32 and the Supabase cloud database. The ESP32 publishes a JSON telemetry record every 5 seconds to the topic nw001/telemetry. The broker forwards this to Supabase via a bridge. The publish-subscribe model means multiple dashboards can receive the same data simultaneously without the ESP32 knowing about them.',
+    why:'MQTT was designed for unreliable networks with low bandwidth — exactly the conditions of rural Nigerian hospitals. A 5-second telemetry record in JSON is approximately 200 bytes. MQTT QoS Level 1 ensures delivery acknowledgement. TLS encryption protects patient data in transit.',
+    fails:'ESP32 cannot connect: check Wi-Fi is active first, then check broker URL and port in config.h. Readings not appearing in dashboard: check MQTT topic names match between firmware and Supabase bridge. Connection drops frequently: intermittent power to router — the ESP32 handles reconnection automatically with exponential backoff.',
+    cost:'NGN 0 (Mosquitto is free / open source)',
+    tools:['Laptop with MQTT client (MQTT Explorer)','network access'],
+    steps:[
+      {t:'Test broker connectivity',b:'Install MQTT Explorer (free). Connect to broker URL with service role credentials. Subscribe to nw001/# and confirm messages arrive every 5 seconds.'},
+      {t:'Check Supabase bridge logs',b:'Supabase Dashboard → Edge Functions → Logs. Messages should show ingestion every 5 seconds when device is online.'},
+      {t:'Verify TLS certificate',b:'If connection refused: confirm port is 8883 (TLS) not 1883 (plain). Check certificate has not expired.'},
+    ],
+  },
+];
+
+// ── FAULT SCENARIOS ──────────────────────────────────────────────────────────
+const FAULTS = [
+  {
+    label:'Heater Failure',
+    type:'CRITICAL THERMAL FAULT',
+    title:'Heater element has failed — temperature falling despite full PID output',
+    context:'A nurse reports the baby feels cold. The warmer has been on for 20 minutes. The LCD shows the reading below. The alarm buzzer is sounding.',
+    readings:[
+      {l:'Temperature', v:'33.8°C', cls:'bad'},
+      {l:'Setpoint',    v:'36.5°C', cls:'ok'},
+      {l:'PID Effort',  v:'100%',   cls:'warn'},
+      {l:'Wi-Fi',       v:'Online', cls:'ok'},
+    ],
+    symptoms:'Temperature is 2.7°C below setpoint and still falling. PID output is at its maximum (100%). The alarm THERMAL LOW has fired. The device is working as designed — the fault is not in the software.',
+    diagnosis:'PID at 100% with falling temperature = the actuator is not responding. The controller is doing everything correctly. The nichrome heater element has either broken (open circuit) or the SSR is not receiving the control signal.',
+    fix:[
+      'Confirm PID=100% in Serial monitor — rules out firmware fault.',
+      'Measure resistance across heater element terminals. Healthy = ~1.44Ω. Open circuit = element wire is broken.',
+      'If element is intact, measure voltage across SSR load terminals during a PID cycle. No voltage = SSR has failed open.',
+      'Replace the faulty component (element or SSR). Do not attempt manual override — the baby must be moved to a working warmer immediately.',
+    ],
+  },
+  {
+    label:'SSR Shorted',
+    type:'EMERGENCY — HARDWARE FAILURE',
+    title:'SSR failed closed — temperature rising with heater control OFF',
+    context:'The buzzer is sounding. Readings show a dangerous situation. The firmware has already correctly cut the heater control signal to 0% — but temperature is still rising.',
+    readings:[
+      {l:'Temperature', v:'38.3°C', cls:'bad'},
+      {l:'Setpoint',    v:'36.5°C', cls:'ok'},
+      {l:'PID Effort',  v:'0%',     cls:'ok'},
+      {l:'Wi-Fi',       v:'Online', cls:'ok'},
+    ],
+    symptoms:'Temperature is 1.8°C above setpoint and rising. PID output is 0% — the controller has correctly ordered the heater off. But the heater is still running. The bimetal cutoff will open at 38.5°C. Patient is at immediate risk of hyperthermia.',
+    diagnosis:'PID=0% but temperature rises = the SSR has failed in the closed (shorted) position. It is passing current to the heater against the control signal. This is an emergency — do not wait for the bimetal cutoff.',
+    fix:[
+      'IMMEDIATELY move the patient to another warming surface.',
+      'Cut all power to the device — disconnect mains and battery terminal.',
+      'After powering down: measure resistance across SSR load terminals. Near-zero ohms with no control signal = confirmed shorted SSR.',
+      'Replace SSR-40DA. Apply thermal paste to heatsink. Before reconnecting heater: verify new SSR opens and closes correctly with multimeter.',
+      'Document incident in maintenance_logs with pre_emptive_flag = false.',
+    ],
+  },
+  {
+    label:'Sensor Fault',
+    type:'SENSOR FAULT — HEATER DISABLED',
+    title:'DS18B20 skin sensor disconnected — heater auto-shutdown',
+    context:'The LCD shows a sensor fault. The buzzer is sounding in a different pattern. The heater has automatically shut off. The device is operating correctly — the safety interlock is working as designed.',
+    readings:[
+      {l:'Temperature', v:'FAULT', cls:'bad'},
+      {l:'Setpoint',    v:'36.5°C', cls:'ok'},
+      {l:'PID Effort',  v:'0%',     cls:'ok'},
+      {l:'Sensor CRC',  v:'ERROR',  cls:'bad'},
+    ],
+    symptoms:'DS18B20 is returning -127°C (DEVICE_DISCONNECTED). The firmware detected this as a CRC error and triggered ALARM_SENSOR_FAULT. The heater has been disabled because you cannot safely heat a patient without temperature feedback.',
+    diagnosis:'The skin sensor has physically disconnected from the 1-Wire bus. This is almost always a wiring fault — the data wire (GPIO4) or GND wire has come loose from the sensor connector.',
+    fix:[
+      'Move patient to backup warmer to maintain thermal care while you diagnose.',
+      'Check the DS18B20 probe cable routing — look for the point where the cable may have been tugged or bent sharply.',
+      'Reconnect the data wire to the 1-Wire bus (GPIO4). Check the GND connection.',
+      'Check the 4.7kΩ pull-up resistor from data line to 3.3V — if this is missing or broken, 1-Wire communication fails.',
+      'Power cycle. Serial monitor should show both sensor ROM addresses. Fault clears automatically when sensor returns valid readings.',
+    ],
+  },
+  {
+    label:'No Power',
+    type:'TOTAL POWER FAILURE',
+    title:'Device completely dead — battery healthy but nothing powers on',
+    context:'The device was working on the previous shift. Now there is no display, no buzzer, no response. You measure the battery with a multimeter: 12.4V. The battery is healthy. The problem is between the battery and the microcontroller.',
+    readings:[
+      {l:'ESP32',      v:'NO BOOT', cls:'bad'},
+      {l:'LCD',        v:'BLANK',   cls:'bad'},
+      {l:'Battery',    v:'12.4V',   cls:'ok'},
+      {l:'5V Rail',    v:'0V',      cls:'bad'},
+    ],
+    symptoms:'Battery is healthy at 12.4V. Nothing downstream is powered. The 5V rail (output of the buck converter) reads 0V. The LM2596 buck converter has failed.',
+    diagnosis:'The LM2596 buck converter converts 12V to 5V. If it fails, the entire device loses power even though the battery is fine. Possible causes: trim potentiometer moved to zero, overcurrent caused thermal shutdown, component failed.',
+    fix:[
+      'Measure LM2596 input terminals: should read 12V from battery. If 0V here, the fault is in the battery wiring not the converter.',
+      'Measure LM2596 output terminals: if 0V with 12V input confirmed, the converter has failed.',
+      'Attempt potentiometer adjustment first: turn the blue trim pot slowly clockwise while measuring output. If output appears, adjust to exactly 5.0V.',
+      'If no output: replace LM2596 module. Connect output side only (no load) first. Set to 5.0V. Then connect to ESP32.',
+      'After repair: check what caused the failure — look for signs of overload (burnt smell, black marks) near the converter.',
+    ],
+  },
+  {
+    label:'Offline Buffer',
+    type:'DATA INTEGRITY WARNING',
+    title:'SD card failed — Store-and-Forward disabled during Wi-Fi outage',
+    context:'Wi-Fi has been down for 3 hours. The baby\'s temperature is stable and the warmer is functioning correctly. However, the LCD shows "Buf: FAIL". Your supervisor wants to know if patient monitoring data has been lost.',
+    readings:[
+      {l:'Temperature', v:'36.5°C',  cls:'ok'},
+      {l:'PID Effort',  v:'18.2%',   cls:'ok'},
+      {l:'Wi-Fi',       v:'OFFLINE', cls:'warn'},
+      {l:'SD Buffer',   v:'FAILED',  cls:'bad'},
+    ],
+    symptoms:'Warmer is clinically functional — PID is maintaining temperature correctly. The problem is data integrity: with both Wi-Fi and SD card unavailable, telemetry readings from the last 3 hours have not been stored anywhere. They are lost.',
+    diagnosis:'SD card initialisation failed at startup. The firmware logged this to Serial but continued operating — clinical function is not affected. Cause is usually a formatting issue, loose SPI connection, or worn card.',
+    fix:[
+      'Remove the SD card and inspect for physical damage or corrosion.',
+      'Insert into laptop: must appear as a drive. If not, card has failed — replace.',
+      'If card appears: confirm it is formatted FAT32 (not exFAT). Reformat if needed.',
+      'Check SPI wiring: GPIO18=CLK, GPIO19=MISO, GPIO23=MOSI, GPIO15=CS.',
+      'Reinsert card and power cycle device. Serial monitor should show "SD ready" and a record count.',
+      'Document the 3-hour data gap in maintenance_logs. Clinical decisions during this period should not rely on automated monitoring records.',
+    ],
+  },
+];
+
+// ════════════════════════════════════════════════════════════════════════════
+//  NAVIGATION
+// ════════════════════════════════════════════════════════════════════════════
+function navigate(pageId, btn){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('page-'+pageId).classList.add('active');
+  btn.classList.add('active');
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+//  PAGE 1 — DIGITAL ANATOMY
+// ════════════════════════════════════════════════════════════════════════════
+function buildAnatomy(){
+  const list = document.getElementById('anatomy-list');
+  list.innerHTML = COMPONENTS.map((c,i) => `
+    <div class="card" id="card-${c.id}">
+      <div class="card-header" onclick="toggleCard(this)">
+        <div class="card-left">
+          <div class="card-icon" style="background:${c.color}22;border:1px solid ${c.color}44">${c.icon}</div>
+          <div>
+            <div class="card-name">${c.name}</div>
+            <div class="card-code">${c.code}</div>
+          </div>
+        </div>
+        <div class="card-chevron">▼</div>
+      </div>
+      <div class="card-body">
+        <div class="info-row">
+          <div class="info-label">Role in the warmer</div>
+          <div class="info-text">${c.role}</div>
+        </div>
+        <div class="info-row">
+          <div class="info-label">Engineering justification</div>
+          <div class="info-text">${c.why}</div>
+        </div>
+        <div class="info-row">
+          <div class="info-label">Failure behaviour</div>
+          <div class="fail-text">${c.fails}</div>
+        </div>
+        <div class="info-row">
+          <div class="info-label">Unit cost</div>
+          <div class="cost-pill">${c.cost}</div>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+function toggleCard(header){
+  const card = header.closest('.card');
+  const isOpen = card.classList.contains('open');
+  // Close all others
+  document.querySelectorAll('.card.open').forEach(c=>c.classList.remove('open'));
+  if(!isOpen) card.classList.add('open');
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+//  PAGE 2 — REPLACE GUIDE
+// ════════════════════════════════════════════════════════════════════════════
+function buildReplace(){
+  const grid = document.getElementById('replaceGrid');
+  grid.innerHTML = COMPONENTS.filter(c=>c.steps&&c.steps.length).map(c=>`
+    <div class="comp-pick" onclick="showReplace('${c.id}',this)">
+      <div class="comp-pick-icon">${c.icon}</div>
+      <div class="comp-pick-name">${c.name.split(' ')[0]}</div>
+    </div>`).join('');
+}
+
+function showReplace(id, el){
+  const comp = COMPONENTS.find(c=>c.id===id);
+  document.querySelectorAll('.comp-pick').forEach(p=>p.classList.remove('selected'));
+  el.classList.add('selected');
+
+  document.getElementById('rp-name').textContent = 'Replacing: '+comp.name;
+  document.getElementById('rp-tools').innerHTML =
+    comp.tools.map(t=>`<span class="tool-tag">${t}</span>`).join('');
+  document.getElementById('rp-steps').innerHTML = comp.steps.map((s,i)=>`
+    <div class="step-item">
+      <div class="step-num-badge">${i+1}</div>
+      <div class="step-content">
+        <div class="step-title">${s.t}</div>
+        <div class="step-body">${s.b}</div>
+      </div>
+    </div>`).join('');
+
+  const panel = document.getElementById('replacePanel');
+  panel.classList.add('show');
+  panel.scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+//  PAGE 3 — DIAGNOSTIC ENGINE
+// ════════════════════════════════════════════════════════════════════════════
+function buildDiagnostic(){
+  // Build fault tabs
+  const tabs = document.getElementById('faultTabs');
+  tabs.innerHTML = FAULTS.map((f,i)=>`
+    <div class="fault-tab${i===0?' active':''}" onclick="showFault(${i},this)">${f.label}</div>`
+  ).join('');
+
+  showFault(0, tabs.firstElementChild);
+}
+
+function showFault(idx, el){
+  const f = FAULTS[idx];
+  document.querySelectorAll('.fault-tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+
+  const container = document.getElementById('scenarioContainer');
+  container.innerHTML = `
+    <div class="scenario-card show">
+      <div class="scenario-banner">
+        <div class="scenario-type">${f.type}</div>
+        <div class="scenario-title">${f.title}</div>
+      </div>
+
+      <div style="padding:.7rem 1rem;border-bottom:1px solid var(--border);
+                  font-size:.75rem;color:var(--muted);line-height:1.6">${f.context}</div>
+
+      <div class="readings-grid">
+        ${f.readings.map(r=>`
+          <div class="reading-box">
+            <div class="reading-label">${r.l}</div>
+            <div class="reading-val ${r.cls}">${r.v}</div>
+          </div>`).join('')}
+      </div>
+
+      <div class="diag-section">
+        <div class="diag-label">Symptoms</div>
+        <div class="diag-text">${f.symptoms}</div>
+      </div>
+
+      <div class="diag-section" style="border-bottom:none">
+        <div class="diag-label">Root cause analysis</div>
+        <div class="diag-text">${f.diagnosis}</div>
+      </div>
+
+      <button class="reveal-btn" onclick="revealFix(this)">Reveal step-by-step fix →</button>
+
+      <div class="fix-section" id="fix-section">
+        <div class="fix-label">Fix procedure</div>
+        ${f.fix.map((step,i)=>`
+          <div class="fix-step">
+            <span class="fix-step-num">${i+1}.</span>
+            <span class="fix-step-text">${step}</span>
+          </div>`).join('')}
+      </div>
+    </div>`;
+}
+
+function revealFix(btn){
+  document.getElementById('fix-section').classList.add('show');
+  btn.style.display='none';
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+//  PAGE 4 — AI CO-PILOT (calls Claude API)
+// ════════════════════════════════════════════════════════════════════════════
+
+// System prompt — contains all the knowledge the AI needs
+const SYSTEM_PROMPT = `You are the NeoWatch AI Diagnostic Co-Pilot for a Smart Neonatal Warmer (Project 20/30GP030, UNILORIN Biomedical Engineering).
+
+You are embedded in a mobile training app used by biomedical technicians in Nigerian hospitals. A technician has opened this app because something is wrong with the warmer and they need guidance.
+
+YOUR ROLE: Diagnose problems and guide the technician to the correct fix. Be direct, practical, and clear. Assume the technician has basic electronics knowledge but may not have used this specific device before.
+
+THE SYSTEM ARCHITECTURE:
+- Tier 1 (Edge): ESP32-WROOM-32 runs PID on Core 0, Wi-Fi/MQTT on Core 1. DS18B20 sensors (GPIO4, 1-Wire, 4.7kΩ pull-up). SSR-40DA controlled by GPIO5 PWM. Buzzer on GPIO2 via 100Ω. SD card SPI (GPIO18/19/23/15). LCD I2C (GPIO21/22, address 0x27). LM2596 buck converter 12V→5V.
+- Tier 2 (Cloud): Supabase PostgreSQL, MQTT broker, Edge Functions for predictive maintenance.
+- Tier 3 (Client): Web dashboard, mobile app, Unity/Vuforia AR interface.
+
+CLINICAL PARAMETERS:
+- Setpoint: 36.5°C (target neonatal skin temperature)
+- ALARM_LOW: 35.0°C — hypothermia threshold — every 1°C drop increases mortality 80% (Mullany et al., 2010)
+- ALARM_HIGH: 38.0°C — hyperthermia threshold — heater cuts off
+- Bimetal cutoff: 38.5°C — hardware safety, independent of all software
+
+CRITICAL DIAGNOSTIC RULES:
+- PID=100% + temperature falling = hardware failure in actuator circuit (heater element or SSR open)
+- PID=0% + temperature rising = SSR shorted closed (EMERGENCY — cut power, move patient)
+- Temperature=FAULT/−127°C = DS18B20 disconnected or CRC error (check 4.7kΩ pull-up on GPIO4)
+- Temperature=85°C = sensor just powered on (normal, wait 1 second)
+- Device completely dead + battery=12V = LM2596 buck converter failure (check 5V output)
+- Readings disappear from cloud + device working = Wi-Fi/MQTT issue (check Store-and-Forward SD buffer)
+- Rising PID effort over days (temperature still normal) = heater degradation (predictive maintenance alert)
+
+RESPONSE STYLE:
+- Keep responses concise and actionable — the technician is standing next to a sick patient
+- Lead with the most likely diagnosis
+- Give numbered steps for any fix procedure
+- Use plain language — avoid academic jargon
+- If patient safety is at risk, say so clearly and immediately at the start of your response
+- Always ask one clarifying question at the end if needed`;
+
+const chatHistory = [];
+
+async function sendMessage(){
+  const input = document.getElementById('chatInput');
+  const msg = input.value.trim();
+  if(!msg) return;
+  input.value='';
+
+  addMessage(msg, 'user');
+
+  // Add thinking indicator
+  const thinkingId = 'thinking-'+Date.now();
+  addMessage('Analysing symptoms...', 'ai thinking', thinkingId);
+
+  document.getElementById('sendBtn').disabled = true;
+
+  chatHistory.push({role:'user', content: msg});
+
+  try {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        model:'claude-sonnet-4-6',
+        max_tokens:1000,
+        system: SYSTEM_PROMPT,
+        messages: chatHistory,
+      })
+    });
+
+    const data = await response.json();
+    const reply = data.content?.[0]?.text || 'I was unable to process that. Please try again.';
+
+    // Remove thinking message
+    const thinkingEl = document.getElementById(thinkingId);
+    if(thinkingEl) thinkingEl.remove();
+
+    addMessage(reply, 'ai');
+    chatHistory.push({role:'assistant', content: reply});
+
+  } catch(err){
+    const thinkingEl = document.getElementById(thinkingId);
+    if(thinkingEl) thinkingEl.remove();
+    addMessage('Connection error. Check your internet connection and try again.\n\nFor offline use, switch to the Diagnostic Engine tab which works without internet.', 'ai');
+  }
+
+  document.getElementById('sendBtn').disabled = false;
+}
+
+function addMessage(text, type, id){
+  const win = document.getElementById('chatWindow');
+  // Remove welcome message on first message
+  const welcome = win.querySelector('.chat-welcome');
+  if(welcome) welcome.remove();
+
+  const div = document.createElement('div');
+  div.className = 'msg '+type;
+  if(id) div.id = id;
+  // Preserve line breaks and numbered lists
+  div.innerHTML = text.replace(/\n/g,'<br>').replace(/(\d+\. )/g,'<br>$1');
+  win.appendChild(div);
+  div.scrollIntoView({behavior:'smooth',block:'end'});
+}
+
+function quickPrompt(btn){
+  const text = btn.textContent.replace('💡 ','');
+  document.getElementById('chatInput').value = text;
+  sendMessage();
+}
+
+// Enter key sends message
+document.addEventListener('DOMContentLoaded', ()=>{
+  document.getElementById('chatInput').addEventListener('keydown', e=>{
+    if(e.key==='Enter') sendMessage();
+  });
+});
+
+// ════════════════════════════════════════════════════════════════════════════
+//  PAGE 5 — 3D FIELD
+// ════════════════════════════════════════════════════════════════════════════
+function launch3D(){
+  // Opens the separate 3D training file
+  // In deployment, this would open 06_ar_training.html
+  showToast('Open 06_ar_training.html in Chrome for the 3D field');
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+//  OFFLINE / PWA SUPPORT
+// ════════════════════════════════════════════════════════════════════════════
+window.addEventListener('offline', ()=>{
+  document.getElementById('offlineBadge').textContent='● OFFLINE';
+  document.getElementById('offlineBadge').style.color='var(--amber)';
+  showToast('Offline — Anatomy, Replace, and Diagnose work without internet');
+});
+window.addEventListener('online', ()=>{
+  document.getElementById('offlineBadge').textContent='● LIVE';
+  document.getElementById('offlineBadge').style.color='';
+});
+
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 3500);
+}
+
+// Register service worker for offline caching
+if('serviceWorker' in navigator){
+  const swCode = `
+    const CACHE = 'neowatch-v1';
+    self.addEventListener('install', e=>{
+      e.waitUntil(caches.open(CACHE).then(c=>c.addAll(['/'])));
+    });
+    self.addEventListener('fetch', e=>{
+      e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request)));
+    });`;
+  const blob = new Blob([swCode],{type:'application/javascript'});
+  navigator.serviceWorker.register(URL.createObjectURL(blob)).catch(()=>{});
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+//  INIT — build all pages on load
+// ════════════════════════════════════════════════════════════════════════════
+buildAnatomy();
+buildReplace();
+buildDiagnostic();
+</script>
+</body>
+</html>
