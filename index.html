@@ -403,7 +403,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);
 
 </div><!-- /app -->
 <div class="toast" id="toast"></div>
-
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
 // ════════════════════════════════════════════════════════════════════════════
 //  DATA — all component, replacement, and fault data lives here.
@@ -889,51 +889,38 @@ RESPONSE STYLE:
 
 const chatHistory = [];
 
-async function sendMessage(){
+function sendMessage(){
   const input = document.getElementById('chatInput');
-  const msg = input.value.trim();
+  const msg = input.value.trim().toLowerCase();
   if(!msg) return;
-  input.value='';
 
-  addMessage(msg, 'user');
-
-  // Add thinking indicator
-  const thinkingId = 'thinking-'+Date.now();
-  addMessage('Analysing symptoms...', 'ai thinking', thinkingId);
-
+  // 1. Show user message
+  addMessage(input.value, 'user');
+  input.value = '';
   document.getElementById('sendBtn').disabled = true;
 
-  chatHistory.push({role:'user', content: msg});
+  // 2. Show thinking animation
+  const thinkingId = 'thinking-'+Date.now();
+  addMessage('Analysing telemetry...', 'ai thinking', thinkingId);
 
-  try {
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({
-        model:'claude-sonnet-4-6',
-        max_tokens:1000,
-        system: SYSTEM_PROMPT,
-        messages: chatHistory,
-      })
-    });
+  // 3. The "Startup" Mock Logic
+  setTimeout(() => {
+    document.getElementById(thinkingId).remove();
+    let reply = "";
 
-    const data = await response.json();
-    const reply = data.content?.[0]?.text || 'I was unable to process that. Please try again.';
-
-    // Remove thinking message
-    const thinkingEl = document.getElementById(thinkingId);
-    if(thinkingEl) thinkingEl.remove();
+    if(msg.includes("cold") || msg.includes("falling")) {
+      reply = "CRITICAL DIAGNOSIS: PID is at 100% but temperature is falling. \n\n1. The Nichrome Heater Element has failed open circuit.\n2. The SSR-40DA is failing to close.\n\nAction: Measure the resistance of the heater element. It should be ~1.44Ω.";
+    } else if (msg.includes("rising") || msg.includes("hot") || msg.includes("off")) {
+      reply = "EMERGENCY: PID is 0% but temperature is rising. \n\nThe SSR-40DA has shorted CLOSED and is passing current continuously. \n\nAction: Cut mains and battery power immediately. Move the neonate.";
+    } else if (msg.includes("blank") || msg.includes("buzzer")) {
+      reply = "POWER FAULT: The ESP32 and LCD run on 5V, but the buzzer runs on 12V. \n\nDiagnosis: The LM2596 Buck Converter has failed. \nAction: Measure the output terminals of the buck converter for 5.0V.";
+    } else {
+      reply = "I am the NeoWatch Diagnostic Co-Pilot. I monitor the 11 core components of this system. Try asking me about a 'falling temperature' or a 'blank LCD'.";
+    }
 
     addMessage(reply, 'ai');
-    chatHistory.push({role:'assistant', content: reply});
-
-  } catch(err){
-    const thinkingEl = document.getElementById(thinkingId);
-    if(thinkingEl) thinkingEl.remove();
-    addMessage('Connection error. Check your internet connection and try again.\n\nFor offline use, switch to the Diagnostic Engine tab which works without internet.', 'ai');
-  }
-
-  document.getElementById('sendBtn').disabled = false;
+    document.getElementById('sendBtn').disabled = false;
+  }, 1200); // Wait 1.2 seconds to make it feel like "real" AI
 }
 
 function addMessage(text, type, id){
@@ -967,10 +954,64 @@ document.addEventListener('DOMContentLoaded', ()=>{
 // ════════════════════════════════════════════════════════════════════════════
 //  PAGE 5 — 3D FIELD
 // ════════════════════════════════════════════════════════════════════════════
+let scene, camera, renderer, group;
+let is3DInitialized = false;
+
 function launch3D(){
-  // Opens the separate 3D training file
-  // In deployment, this would open 06_ar_training.html
-  showToast('Open 06_ar_training.html in Chrome for the 3D field');
+  if(is3DInitialized) return; // Prevent loading twice
+  
+  const slot = document.getElementById('threejsSlot');
+  slot.innerHTML = ''; // Clear the placeholder text
+  slot.style.padding = '0'; // Remove padding so canvas fills it
+
+  // 1. Setup Scene & Camera
+  scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x0D1117);
+  camera = new THREE.PerspectiveCamera(45, slot.clientWidth / slot.clientHeight, 0.1, 100);
+  camera.position.set(0, 0, 5.5);
+
+  // 2. Setup Renderer
+  renderer = new THREE.WebGLRenderer({ antialias: true });
+  renderer.setSize(slot.clientWidth, slot.clientHeight);
+  slot.appendChild(renderer.domElement);
+
+  // 3. Add Lights
+  scene.add(new THREE.AmbientLight(0xE6EDF3, 0.6));
+  const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+  dirLight.position.set(3, 5, 4);
+  scene.add(dirLight);
+
+  // 4. Build Components
+  group = new THREE.Group();
+  scene.add(group);
+
+  // Loop through your data and create a 3D block for each part
+  COMPONENTS.forEach((comp, index) => {
+    const geo = new THREE.BoxGeometry(0.5, 0.5, 0.5);
+    const mat = new THREE.MeshStandardMaterial({ 
+      color: comp.color, 
+      metalness: 0.3, 
+      roughness: 0.4 
+    });
+    const mesh = new THREE.Mesh(geo, mat);
+    
+    // Arrange them in a neat 3-column grid
+    mesh.position.x = (index % 3) * 1.0 - 1.0;
+    mesh.position.y = Math.floor(index / 3) * -1.0 + 1.5;
+    
+    group.add(mesh);
+  });
+
+  is3DInitialized = true;
+  animate3D();
+}
+
+function animate3D() {
+  requestAnimationFrame(animate3D);
+  if(group) {
+    group.rotation.y += 0.005; // Slowly spin the whole grid
+  }
+  renderer.render(scene, camera);
 }
 
 // ════════════════════════════════════════════════════════════════════════════
