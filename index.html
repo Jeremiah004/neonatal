@@ -1,499 +1,707 @@
-Here is the complete, rewritten code. 
-
-To achieve a state-of-the-art, premium "startup" aesthetic (similar to Vercel, Linear, or Apple Health), this version:
-1. **Strips away the "gamer" look:** Removes the glowing background blobs, heavy neon shadows, and noise textures.
-2. **Replaces Emojis with Professional Icons:** Integrates the **Lucide** icon library. Emojis make apps look like toys; vector icons make them look like clinical tools.
-3. **Refines the Color Palette:** Uses a true OLED black (`#000000`) background with subtle, elevated grays (`#0A0A0A`, `#141414`) and hyper-thin borders (`#222222`) to create depth without relying on messy drop-shadows.
-4. **Improves Typography:** Tightens letter spacing and utilizes font weights properly for a crisp, high-hierarchy layout.
-
-Copy and paste this entirely into your file:
-
-```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
-<meta name="theme-color" content="#000000"/>
+<meta name="theme-color" content="#04080F"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
 <title>NeoWatch Training Hub</title>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
-<script src="https://unpkg.com/lucide@latest"></script>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
 <style>
-/* ════════════════════════════════════════════════════════════
-   STATE-OF-THE-ART DESIGN TOKENS (Vercel/Linear Aesthetic)
-   ════════════════════════════════════════════════════════════ */
 :root {
-  --bg:          #000000;
-  --surface:     #0A0A0A;
-  --surface2:    #141414;
-  --surface-hover: #1A1A1A;
-  --border:      #222222;
-  --border-lit:  #333333;
-  --text:        #EDEDED;
-  --muted:       #A1A1AA;
-  
-  /* Clinical, muted accents instead of harsh neons */
-  --green:       #10B981;
-  --green-dim:   rgba(16, 185, 129, 0.1);
-  --blue:        #3B82F6;
-  --blue-dim:    rgba(59, 130, 246, 0.1);
-  --red:         #EF4444;
-  --red-dim:     rgba(239, 68, 68, 0.1);
-  --amber:       #F59E0B;
-  --amber-dim:   rgba(245, 158, 11, 0.1);
-  --purple:      #8B5CF6;
-  
-  --radius:      12px;
-  --nav-h:       72px;
-  --mono:        'JetBrains Mono', monospace;
+  --bg:        #04080F;
+  --navy:      #070D1A;
+  --surface:   rgba(8, 16, 32, 0.82);
+  --surface2:  rgba(12, 22, 44, 0.70);
+  --panel:     rgba(6, 12, 26, 0.95);
+  --border:    rgba(255,255,255,0.06);
+  --border2:   rgba(255,255,255,0.11);
+  --live:      #00E5A0;
+  --live-dim:  rgba(0,229,160,0.08);
+  --live-glow: rgba(0,229,160,0.22);
+  --warn:      #F5A623;
+  --warn-dim:  rgba(245,166,35,0.09);
+  --crit:      #FF4D6D;
+  --crit-dim:  rgba(255,77,109,0.09);
+  --info:      #3D9EFF;
+  --info-dim:  rgba(61,158,255,0.09);
+  --text:      #E8EEF6;
+  --muted:     #5A6A80;
+  --muted2:    #8898AA;
+  --mono:      'DM Mono', monospace;
+  --sans:      'DM Sans', sans-serif;
+  --display:   'Syne', sans-serif;
+  --nav-h:     66px;
+  --r:         10px;
 }
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--sans);font-size:15px;}
 
-* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(--text); font-family: 'Plus Jakarta Sans', sans-serif; }
+/* PCB GRID */
+body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+  background-image:
+    linear-gradient(rgba(0,229,160,0.028) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(0,229,160,0.028) 1px,transparent 1px),
+    linear-gradient(rgba(0,229,160,0.012) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(0,229,160,0.012) 1px,transparent 1px);
+  background-size:80px 80px,80px 80px,16px 16px,16px 16px;}
+body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+  background-image:radial-gradient(circle at 20% 15%,rgba(0,229,160,0.06) 0%,transparent 40%),
+                   radial-gradient(circle at 85% 80%,rgba(61,158,255,0.05) 0%,transparent 38%);}
 
-/* ── LAYOUT ── */
-#app { display: flex; flex-direction: column; height: 100vh; max-width: 500px; margin: 0 auto; position: relative; overflow: hidden; background: var(--bg); border-left: 1px solid var(--border); border-right: 1px solid var(--border); }
+#app{display:flex;flex-direction:column;height:100vh;max-width:480px;margin:0 auto;position:relative;overflow:hidden;z-index:1;}
 
-/* ── HEADER ── */
-.app-header { background: rgba(0,0,0,0.8); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); padding: 1rem; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; z-index: 10; }
-.logo { display: flex; align-items: center; gap: 0.75rem; }
-.logo-pulse { width: 8px; height: 8px; border-radius: 50%; background: var(--green); box-shadow: 0 0 12px var(--green); animation: pulse 2s infinite; }
-@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
-.logo-text { font-size: 1rem; font-weight: 700; letter-spacing: -0.02em; }
-.logo-sub { font-size: 0.65rem; color: var(--muted); font-family: var(--mono); margin-top: 2px;}
-.header-badge { font-family: var(--mono); font-size: 0.65rem; background: var(--green-dim); border: 1px solid rgba(16,185,129,0.2); color: var(--green); padding: 0.25rem 0.6rem; border-radius: 99px; }
+/* HEADER */
+.app-header{background:rgba(4,8,15,0.92);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);
+  border-bottom:1px solid var(--border2);padding:0 1.1rem;height:56px;
+  display:flex;align-items:center;justify-content:space-between;flex-shrink:0;z-index:20;position:relative;}
+.app-header::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,var(--live-glow),transparent);}
+.logo{display:flex;align-items:center;gap:.6rem;}
+.logo-mark{width:32px;height:32px;border-radius:7px;background:var(--live-dim);border:1px solid var(--live-glow);
+  display:flex;align-items:center;justify-content:center;position:relative;}
+.logo-mark svg{width:16px;height:16px;}
+.live-dot{position:absolute;top:-3px;right:-3px;width:7px;height:7px;border-radius:50%;
+  background:var(--live);box-shadow:0 0 0 2px var(--bg),0 0 8px var(--live);animation:blink 2.8s ease-in-out infinite;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+.logo-name{font-family:var(--display);font-size:.95rem;font-weight:800;letter-spacing:-.02em;color:var(--text);}
+.logo-sub{font-family:var(--mono);font-size:.52rem;color:var(--muted);letter-spacing:.08em;margin-top:2px;}
+.status-badge{font-family:var(--mono);font-size:.58rem;font-weight:500;letter-spacing:.1em;
+  background:var(--live-dim);border:1px solid var(--live-glow);color:var(--live);padding:.22rem .65rem;border-radius:4px;}
 
-/* ── PAGE CONTAINER ── */
-#pages { flex: 1; overflow-y: auto; position: relative; scroll-behavior: smooth; }
-.page { position: absolute; inset: 0; overflow-y: auto; padding: 1.5rem 1.25rem calc(var(--nav-h) + 2rem); display: none; -webkit-overflow-scrolling: touch; }
-.page.active { display: block; animation: fadeUp 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
-@keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+/* PAGES */
+#pages{flex:1;overflow:hidden;position:relative;}
+.page{position:absolute;inset:0;overflow-y:auto;-webkit-overflow-scrolling:touch;
+  padding:1.1rem 1rem calc(var(--nav-h)+1.2rem);display:none;}
+.page.active{display:block;animation:pageIn .22s cubic-bezier(.4,0,.2,1);}
+@keyframes pageIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
 
-/* ── BOTTOM NAV ── */
-.bottom-nav { position: absolute; bottom: 0; left: 0; right: 0; height: var(--nav-h); background: rgba(10,10,10,0.85); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-top: 1px solid var(--border); display: flex; align-items: center; padding-bottom: env(safe-area-inset-bottom, 0); z-index: 20; }
-.nav-btn { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; background: none; border: none; cursor: pointer; color: #52525B; font-size: 0.6rem; font-weight: 600; transition: color 0.2s ease; }
-.nav-btn.active { color: var(--text); }
-.nav-icon { width: 20px; height: 20px; transition: transform 0.2s ease; }
-.nav-btn.active .nav-icon { transform: translateY(-2px); color: var(--text); }
+/* PAGE HEADER */
+.ph{margin-bottom:1.2rem;padding-bottom:.9rem;border-bottom:1px solid var(--border);}
+.ph-label{font-family:var(--mono);font-size:.56rem;color:var(--live);letter-spacing:.18em;text-transform:uppercase;margin-bottom:.35rem;}
+.ph-title{font-family:var(--display);font-size:1.25rem;font-weight:800;letter-spacing:-.03em;color:var(--text);}
+.ph-sub{font-size:.73rem;color:var(--muted2);line-height:1.6;margin-top:.3rem;font-weight:300;}
 
-/* ── TYPOGRAPHY & SECTIONS ── */
-.section-header { margin-bottom: 1.5rem; }
-.section-title { font-size: 1.25rem; font-weight: 700; margin-bottom: 0.35rem; letter-spacing: -0.02em; }
-.section-sub { font-size: 0.8rem; color: var(--muted); line-height: 1.6; }
+/* BOTTOM NAV */
+.bottom-nav{height:var(--nav-h);background:rgba(4,8,15,0.96);backdrop-filter:blur(28px);-webkit-backdrop-filter:blur(28px);
+  border-top:1px solid var(--border2);display:flex;align-items:stretch;flex-shrink:0;z-index:20;}
+.nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;
+  background:none;border:none;cursor:pointer;color:var(--muted);font-family:var(--mono);
+  font-size:.5rem;font-weight:500;letter-spacing:.08em;text-transform:uppercase;
+  transition:color .25s ease;padding:.4rem 0;position:relative;}
+.nav-btn::after{content:'';position:absolute;bottom:0;left:25%;right:25%;height:2px;
+  background:var(--live);border-radius:2px 2px 0 0;box-shadow:0 0 8px var(--live);
+  transform:scaleX(0);transition:transform .25s cubic-bezier(.4,0,.2,1);}
+.nav-btn.active{color:var(--live);}
+.nav-btn.active::after{transform:scaleX(1);}
+.nav-btn svg{width:20px;height:20px;transition:transform .25s cubic-bezier(.4,0,.2,1);}
+.nav-btn:active svg{transform:scale(.85);}
+.nav-btn.active svg{filter:drop-shadow(0 0 5px var(--live-glow));}
 
-/* ── CARDS (MODERN MINIMAL) ── */
-.card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 0.75rem; overflow: hidden; transition: all 0.2s ease; }
-.card:active { transform: scale(0.98); background: var(--surface-hover); }
-.card-header { display: flex; align-items: center; justify-content: space-between; padding: 1rem; cursor: pointer; }
-.card-left { display: flex; align-items: center; gap: 0.85rem; }
-.card-icon { width: 38px; height: 38px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-.card-name { font-size: 0.9rem; font-weight: 600; color: var(--text); }
-.card-code { font-size: 0.65rem; color: var(--muted); font-family: var(--mono); margin-top: 3px; }
-.card-chevron { width: 16px; height: 16px; color: var(--muted); transition: transform 0.3s ease; }
-.card.open .card-chevron { transform: rotate(180deg); }
-.card-body { display: none; padding: 0 1rem 1.25rem; border-top: 1px solid var(--border); }
-.card.open .card-body { display: block; animation: fadeUp 0.3s ease; }
-.info-row { margin-top: 1rem; }
-.info-label { font-size: 0.65rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.4rem; }
-.info-text { font-size: 0.85rem; color: #D4D4D8; line-height: 1.6; }
-.cost-pill { display: inline-block; background: var(--surface2); border: 1px solid var(--border-lit); color: var(--text); font-family: var(--mono); font-size: 0.7rem; padding: 0.3rem 0.6rem; border-radius: 6px; margin-top: 0.25rem; }
+/* COMPONENT CARDS */
+.comp-card{display:flex;align-items:stretch;background:var(--surface);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+  border:1px solid var(--border);border-radius:var(--r);margin-bottom:.65rem;overflow:hidden;
+  box-shadow:0 4px 24px rgba(0,0,0,.4);transition:border-color .25s ease,box-shadow .25s ease;cursor:pointer;}
+.comp-card.open{border-color:var(--border2);box-shadow:0 8px 40px rgba(0,0,0,.5);}
+.comp-card:active{transform:scale(.99);}
+.card-strip{width:3px;flex-shrink:0;}
+.card-main{flex:1;min-width:0;}
+.card-top{display:flex;align-items:center;justify-content:space-between;padding:.8rem .9rem;}
+.card-icon-wrap{width:38px;height:38px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-right:.75rem;}
+.card-icon-wrap svg{width:20px;height:20px;}
+.card-identity{flex:1;min-width:0;}
+.card-name{font-family:var(--display);font-size:.9rem;font-weight:700;letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.card-spec{font-family:var(--mono);font-size:.56rem;color:var(--muted);margin-top:3px;letter-spacing:.04em;}
+.card-chevron{width:24px;height:24px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-left:.4rem;transition:transform .3s cubic-bezier(.4,0,.2,1);}
+.card-chevron svg{width:12px;height:12px;color:var(--muted);}
+.comp-card.open .card-chevron{transform:rotate(180deg);}
+.card-body{display:none;padding:0 .9rem .9rem;border-top:1px solid var(--border);}
+.comp-card.open .card-body{display:block;}
+.info-block{margin-top:.85rem;}
+.info-lbl{font-family:var(--mono);font-size:.52rem;font-weight:500;color:var(--muted);letter-spacing:.16em;text-transform:uppercase;margin-bottom:.35rem;}
+.info-txt{font-size:.75rem;color:var(--muted2);line-height:1.75;font-weight:300;}
+.fail-txt{font-size:.75rem;color:#FF8FA3;line-height:1.75;font-weight:300;}
+.cost-tag{display:inline-flex;align-items:center;gap:.35rem;margin-top:.5rem;
+  border:1px solid;font-family:var(--mono);font-size:.65rem;padding:.25rem .65rem;border-radius:4px;}
+.cost-tag svg{width:11px;height:11px;}
 
-/* ── REPLACE PAGE ── */
-.comp-select-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 1.5rem; }
-.comp-pick { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem 0.5rem; text-align: center; cursor: pointer; transition: all 0.2s ease; display: flex; flex-direction: column; align-items: center; gap: 0.5rem; }
-.comp-pick:active { transform: scale(0.96); }
-.comp-pick.selected { border-color: var(--text); background: var(--surface2); }
-.comp-pick-icon { width: 24px; height: 24px; color: var(--muted); }
-.comp-pick.selected .comp-pick-icon { color: var(--text); }
-.comp-pick-name { font-size: 0.75rem; font-weight: 600; color: var(--muted); }
-.comp-pick.selected .comp-pick-name { color: var(--text); }
-.replace-panel { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; display: none; }
-.replace-panel.show { display: block; animation: fadeUp 0.3s ease; }
-.replace-header { background: var(--surface2); padding: 1rem; border-bottom: 1px solid var(--border); }
-.replace-comp-name { font-size: 1rem; font-weight: 600; color: var(--text); }
-.tools-section { padding: 1rem; border-bottom: 1px solid var(--border); }
-.tools-flex { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.5rem; }
-.tool-tag { background: var(--blue-dim); border: 1px solid rgba(59,130,246,0.2); color: var(--blue); font-size: 0.7rem; padding: 0.25rem 0.6rem; border-radius: 6px; }
-.step-item { display: flex; gap: 1rem; padding: 1rem; border-bottom: 1px solid var(--border); }
-.step-item:last-child { border-bottom: none; }
-.step-num-badge { width: 24px; height: 24px; border-radius: 6px; background: var(--surface2); border: 1px solid var(--border-lit); color: var(--text); font-size: 0.75rem; font-weight: 600; font-family: var(--mono); flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
-.step-title { font-size: 0.9rem; font-weight: 600; margin-bottom: 0.3rem; color: var(--text); }
-.step-body { font-size: 0.85rem; color: var(--muted); line-height: 1.6; }
+/* REPLACE PAGE */
+.comp-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem;margin-bottom:1.1rem;}
+.comp-tile{background:var(--surface);backdrop-filter:blur(12px);border:1px solid var(--border);
+  border-radius:9px;padding:.7rem .4rem .6rem;text-align:center;cursor:pointer;
+  transition:all .25s cubic-bezier(.4,0,.2,1);box-shadow:0 2px 12px rgba(0,0,0,.3);}
+.comp-tile:active{transform:scale(.93);}
+.comp-tile.sel{border-color:var(--live);background:var(--live-dim);box-shadow:0 0 20px var(--live-glow);}
+.comp-tile svg{width:22px;height:22px;margin:0 auto 6px;display:block;}
+.comp-tile-name{font-family:var(--mono);font-size:.55rem;color:var(--muted);letter-spacing:.04em;line-height:1.3;}
+.comp-tile.sel .comp-tile-name{color:var(--live);}
+.rp-panel{background:var(--surface);backdrop-filter:blur(16px);border:1px solid var(--border);
+  border-radius:var(--r);overflow:hidden;display:none;box-shadow:0 8px 40px rgba(0,0,0,.5);}
+.rp-panel.show{display:block;animation:pageIn .22s ease;}
+.rp-head{padding:.9rem 1rem;background:var(--live-dim);border-bottom:1px solid var(--live-glow);display:flex;align-items:center;gap:.65rem;}
+.rp-head svg{width:20px;height:20px;flex-shrink:0;}
+.rp-title{font-family:var(--display);font-size:.95rem;font-weight:700;color:var(--live);}
+.rp-tools{padding:.8rem 1rem;border-bottom:1px solid var(--border);display:flex;flex-wrap:wrap;gap:.35rem;}
+.tool-chip{background:var(--info-dim);border:1px solid rgba(61,158,255,.25);color:var(--info);font-family:var(--mono);font-size:.6rem;padding:.22rem .55rem;border-radius:4px;}
+.rp-steps{padding:.9rem 1rem;}
+.step-row{display:flex;gap:.8rem;margin-bottom:.95rem;align-items:flex-start;}
+.step-num{width:24px;height:24px;border-radius:50%;flex-shrink:0;background:linear-gradient(135deg,#00C585,var(--live));color:var(--bg);font-family:var(--mono);font-size:.68rem;font-weight:500;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 10px var(--live-glow);}
+.step-t{font-size:.8rem;font-weight:500;margin-bottom:.2rem;color:var(--text);}
+.step-b{font-size:.72rem;color:var(--muted2);line-height:1.65;font-weight:300;}
 
-/* ── DIAGNOSTIC ENGINE ── */
-.fault-tabs { display: flex; gap: 0.5rem; overflow-x: auto; padding-bottom: 0.5rem; margin-bottom: 1rem; scrollbar-width: none; }
-.fault-tabs::-webkit-scrollbar { display: none; }
-.fault-tab { flex-shrink: 0; padding: 0.5rem 1rem; border-radius: 99px; font-size: 0.75rem; font-weight: 600; cursor: pointer; background: var(--surface); border: 1px solid var(--border); color: var(--muted); transition: all 0.2s ease; }
-.fault-tab.active { background: var(--text); border-color: var(--text); color: var(--bg); }
-.scenario-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; display: none; }
-.scenario-card.show { display: block; animation: fadeUp 0.3s ease; }
-.scenario-banner { background: var(--surface2); border-bottom: 1px solid var(--border); padding: 1rem; }
-.scenario-type { font-size: 0.65rem; font-weight: 600; color: var(--red); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.25rem; }
-.scenario-title { font-size: 1rem; font-weight: 600; color: var(--text); }
-.readings-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--border); border-bottom: 1px solid var(--border); }
-.reading-box { background: var(--surface); padding: 1rem; }
-.reading-label { font-size: 0.65rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
-.reading-val { font-family: var(--mono); font-size: 1.25rem; font-weight: 500; margin-top: 0.4rem; }
-.reading-val.ok { color: var(--text); }
-.reading-val.warn { color: var(--amber); }
-.reading-val.bad { color: var(--red); }
-.reveal-btn { margin: 1rem; width: calc(100% - 2rem); padding: 0.85rem; border-radius: 8px; border: 1px solid var(--text); background: var(--text); color: var(--bg); font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: transform 0.2s ease; }
-.reveal-btn:active { transform: scale(0.98); }
-.fix-section { display: none; padding: 1.25rem 1rem; background: var(--surface2); border-top: 1px solid var(--border); }
-.fix-section.show { display: block; animation: fadeUp 0.3s ease; }
-.fix-step { display: flex; gap: 0.75rem; margin-bottom: 0.85rem; font-size: 0.85rem; }
-.fix-step-num { color: var(--green); font-weight: 600; font-family: var(--mono); flex-shrink: 0; }
-.fix-step-text { color: #D4D4D8; line-height: 1.6; }
+/* DIAGNOSTIC */
+.ftabs{display:flex;gap:.4rem;overflow-x:auto;padding-bottom:.5rem;margin-bottom:1rem;scrollbar-width:none;}
+.ftabs::-webkit-scrollbar{display:none;}
+.ftab{flex-shrink:0;padding:.38rem .85rem;border-radius:20px;font-family:var(--mono);font-size:.6rem;font-weight:500;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;background:var(--surface);border:1px solid var(--border);color:var(--muted);transition:all .25s ease;white-space:nowrap;backdrop-filter:blur(8px);}
+.ftab:active{transform:scale(.95);}
+.ftab.active{background:var(--crit-dim);border-color:rgba(255,77,109,.4);color:var(--crit);box-shadow:0 0 16px rgba(255,77,109,.15);}
+.monitor-card{background:var(--surface);backdrop-filter:blur(16px);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;display:none;box-shadow:0 8px 40px rgba(0,0,0,.5);}
+.monitor-card.show{display:block;animation:pageIn .22s ease;}
+.monitor-banner{background:var(--crit-dim);border-bottom:1px solid rgba(255,77,109,.2);padding:.9rem 1rem;display:flex;gap:.75rem;align-items:flex-start;}
+.banner-icon{width:36px;height:36px;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
+.banner-icon svg{width:28px;height:28px;}
+.banner-type{font-family:var(--mono);font-size:.54rem;color:var(--crit);letter-spacing:.14em;text-transform:uppercase;margin-bottom:.3rem;}
+.banner-title{font-family:var(--display);font-size:.92rem;font-weight:700;color:var(--text);line-height:1.35;}
+.monitor-ctx{padding:.75rem 1rem;border-bottom:1px solid var(--border);font-size:.72rem;color:var(--muted2);line-height:1.65;font-weight:300;}
 
-/* ── AI COPILOT ── */
-.copilot-context { background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem; margin-bottom: 1.25rem; font-size: 0.8rem; color: var(--muted); line-height: 1.6; }
-.chat-window { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); min-height: 300px; max-height: 400px; overflow-y: auto; padding: 1rem; margin-bottom: 1rem; display: flex; flex-direction: column; gap: 1rem; }
-.msg { max-width: 85%; border-radius: 12px; padding: 0.85rem 1rem; font-size: 0.85rem; line-height: 1.6; }
-.msg.user { align-self: flex-end; background: var(--surface2); border: 1px solid var(--border-lit); color: var(--text); border-bottom-right-radius: 4px; }
-.msg.ai { align-self: flex-start; background: transparent; border: 1px solid var(--border); color: var(--text); border-bottom-left-radius: 4px; }
-.msg.thinking { color: var(--muted); font-style: italic; border: none; padding-left: 0;}
-.quick-btn { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 0.75rem 1rem; text-align: left; font-size: 0.8rem; color: var(--text); cursor: pointer; transition: all 0.2s ease; margin-bottom: 0.5rem; display: flex; gap: 0.5rem; align-items: center; }
-.quick-btn:active { background: var(--surface2); border-color: var(--border-lit); }
-.chat-input-row { display: flex; gap: 0.5rem; }
-.chat-input { flex: 1; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 0.85rem 1rem; color: var(--text); font-size: 0.9rem; outline: none; font-family: inherit; transition: border-color 0.2s; }
-.chat-input:focus { border-color: var(--border-lit); }
-.chat-send { background: var(--text); border: none; border-radius: 8px; padding: 0 1.25rem; color: var(--bg); font-weight: 600; cursor: pointer; transition: transform 0.2s; display: flex; align-items: center; justify-content: center;}
-.chat-send:active { transform: scale(0.95); }
+/* INSTRUMENT READOUTS */
+.readouts{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;padding:.85rem 1rem;border-bottom:1px solid var(--border);}
+.readout{background:var(--panel);border:1px solid var(--border2);border-radius:8px;padding:.7rem .8rem;position:relative;overflow:hidden;}
+.readout::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;}
+.readout.ok::before{background:linear-gradient(90deg,transparent,var(--live-glow),transparent);}
+.readout.warn::before{background:linear-gradient(90deg,transparent,rgba(245,166,35,.4),transparent);}
+.readout.bad::before{background:linear-gradient(90deg,transparent,rgba(255,77,109,.4),transparent);}
+.readout-lbl{font-family:var(--mono);font-size:.52rem;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:.4rem;}
+.readout-val{font-family:var(--mono);font-size:1.35rem;font-weight:500;line-height:1;letter-spacing:-.02em;}
+.readout-val.ok{color:var(--live);text-shadow:0 0 16px var(--live-glow);}
+.readout-val.warn{color:var(--warn);}
+.readout-val.bad{color:var(--crit);text-shadow:0 0 16px rgba(255,77,109,.4);}
+.readout-unit{font-family:var(--mono);font-size:.55rem;color:var(--muted);margin-top:.3rem;letter-spacing:.06em;}
+.diag-blk{padding:.8rem 1rem;border-bottom:1px solid var(--border);}
+.diag-lbl{font-family:var(--mono);font-size:.52rem;color:var(--muted);letter-spacing:.16em;text-transform:uppercase;margin-bottom:.45rem;}
+.diag-txt{font-size:.74rem;color:var(--muted2);line-height:1.75;font-weight:300;}
+.reveal-btn{margin:.9rem;width:calc(100% - 1.8rem);padding:.75rem;border-radius:8px;border:1px solid var(--live-glow);background:var(--live-dim);color:var(--live);font-family:var(--display);font-size:.82rem;font-weight:700;cursor:pointer;transition:all .25s cubic-bezier(.4,0,.2,1);}
+.reveal-btn:active{transform:scale(.97);}
+.fix-blk{display:none;padding:.9rem 1rem;background:rgba(0,229,160,.04);border-top:1px solid var(--live-glow);}
+.fix-blk.show{display:block;animation:pageIn .2s ease;}
+.fix-lbl{font-family:var(--mono);font-size:.52rem;color:var(--live);letter-spacing:.16em;text-transform:uppercase;margin-bottom:.6rem;}
+.fix-row{display:flex;gap:.65rem;margin-bottom:.6rem;}
+.fix-n{font-family:var(--mono);font-size:.72rem;color:var(--live);font-weight:500;flex-shrink:0;}
+.fix-t{font-size:.74rem;color:var(--muted2);line-height:1.65;font-weight:300;}
 
-/* ── 3D FIELD PAGE ── */
-.threejs-slot { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); min-height: 340px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 2rem; margin-bottom: 1.5rem; overflow: hidden;}
-.launch-3d-btn { width: 100%; padding: 1rem; border-radius: 8px; border: none; background: var(--text); color: var(--bg); font-size: 0.95rem; font-weight: 600; cursor: pointer; margin-bottom: 1rem; font-family: inherit; transition: transform 0.2s; }
-.launch-3d-btn:active { transform: scale(0.98); }
+/* AI COPILOT */
+.ai-ctx{background:var(--info-dim);border:1px solid rgba(61,158,255,.2);backdrop-filter:blur(8px);border-radius:9px;padding:.75rem 1rem;margin-bottom:.9rem;font-size:.72rem;color:#82B8FF;line-height:1.6;font-weight:300;}
+.ai-ctx strong{display:block;font-family:var(--display);font-size:.8rem;font-weight:700;margin-bottom:.25rem;color:var(--info);}
+.quick-list{display:flex;flex-direction:column;gap:.4rem;margin-bottom:.8rem;}
+.qbtn{background:var(--surface);backdrop-filter:blur(8px);border:1px solid var(--border);border-radius:8px;padding:.55rem .85rem;text-align:left;font-family:var(--sans);font-size:.71rem;color:var(--muted2);cursor:pointer;transition:all .25s ease;display:flex;align-items:center;gap:.55rem;}
+.qbtn svg{width:14px;height:14px;flex-shrink:0;color:var(--info);}
+.qbtn:active{border-color:var(--info);color:#82B8FF;background:var(--info-dim);transform:scale(.98);}
+.chat-win{background:var(--surface);backdrop-filter:blur(16px);border:1px solid var(--border);border-radius:var(--r);min-height:240px;max-height:340px;overflow-y:auto;padding:.85rem;margin-bottom:.7rem;display:flex;flex-direction:column;gap:.65rem;-webkit-overflow-scrolling:touch;box-shadow:0 4px 32px rgba(0,0,0,.4);}
+.msg{max-width:87%;border-radius:10px;padding:.65rem .9rem;font-size:.75rem;line-height:1.7;}
+.msg.user{align-self:flex-end;background:linear-gradient(135deg,#00B87A,var(--live));color:var(--bg);border-bottom-right-radius:3px;font-weight:500;box-shadow:0 3px 14px var(--live-glow);}
+.msg.ai{align-self:flex-start;background:var(--surface2);border:1px solid var(--border2);color:var(--text);border-bottom-left-radius:3px;backdrop-filter:blur(8px);}
+.msg.thinking{background:transparent!important;border-style:dashed;color:var(--muted);}
+.dots span{display:inline-block;width:5px;height:5px;border-radius:50%;background:var(--muted);margin:0 2px;animation:db 1.2s infinite;}
+.dots span:nth-child(2){animation-delay:.2s}.dots span:nth-child(3){animation-delay:.4s}
+@keyframes db{0%,80%,100%{transform:translateY(0)}40%{transform:translateY(-5px)}}
+.chat-welcome{text-align:center;color:var(--muted);font-size:.74rem;padding:1.5rem 1rem;line-height:1.8;font-weight:300;}
+.chat-welcome-icon{margin-bottom:.7rem;opacity:.45;}
+.chat-welcome-icon svg{width:36px;height:36px;}
+.chat-row{display:flex;gap:.5rem;}
+.chat-in{flex:1;background:var(--surface);backdrop-filter:blur(8px);border:1.5px solid var(--border2);border-radius:8px;padding:.65rem .9rem;color:var(--text);font-family:var(--sans);font-size:.8rem;outline:none;transition:border-color .25s,box-shadow .25s;}
+.chat-in:focus{border-color:var(--info);box-shadow:0 0 0 3px rgba(61,158,255,.1);}
+.chat-send{background:linear-gradient(135deg,#1A6ADB,var(--info));border:none;border-radius:8px;padding:.65rem 1.1rem;color:#fff;font-family:var(--display);font-size:.8rem;font-weight:700;cursor:pointer;flex-shrink:0;transition:all .25s ease;box-shadow:0 3px 12px rgba(61,158,255,.3);}
+.chat-send:active{transform:scale(.95);}
+.chat-send:disabled{opacity:.35;cursor:default;transform:none;}
 
-/* ── TOAST ── */
-.toast { position: fixed; bottom: calc(var(--nav-h) + 20px); left: 50%; transform: translateX(-50%) translateY(20px); background: var(--text); color: var(--bg); padding: 0.75rem 1.25rem; border-radius: 99px; font-size: 0.8rem; font-weight: 600; opacity: 0; transition: all 0.3s ease; z-index: 50; white-space: nowrap; }
-.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+/* 3D PAGE */
+.slot-3d{background:var(--surface);backdrop-filter:blur(12px);border:1px solid var(--border);border-radius:var(--r);min-height:280px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:2rem;margin-bottom:1rem;box-shadow:0 4px 32px rgba(0,0,0,.4);}
+.slot-3d svg{width:40px;height:40px;opacity:.3;margin-bottom:.8rem;}
+.slot-t{font-family:var(--display);font-size:.9rem;font-weight:700;color:var(--muted2);margin-bottom:.4rem;}
+.slot-d{font-size:.72rem;color:var(--muted);line-height:1.65;max-width:260px;font-weight:300;}
+.slot-badge{margin-top:.9rem;font-family:var(--mono);font-size:.6rem;background:rgba(208,172,255,.08);border:1px solid rgba(208,172,255,.25);color:#D0ACFF;padding:.26rem .65rem;border-radius:4px;}
+.btn-3d{width:100%;padding:.88rem;border-radius:9px;border:none;background:linear-gradient(135deg,#00B87A,var(--live));color:var(--bg);font-family:var(--display);font-size:.9rem;font-weight:800;cursor:pointer;margin-bottom:.8rem;box-shadow:0 6px 24px var(--live-glow);transition:all .25s ease;}
+.btn-3d:active{transform:scale(.97);}
+
+.toast{position:fixed;bottom:calc(var(--nav-h)+14px);left:50%;transform:translateX(-50%) translateY(20px);background:var(--warn);color:var(--bg);padding:.5rem 1.1rem;border-radius:20px;font-family:var(--mono);font-size:.68rem;font-weight:500;opacity:0;transition:all .3s cubic-bezier(.4,0,.2,1);z-index:50;white-space:nowrap;box-shadow:0 4px 20px rgba(245,166,35,.4);}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+::-webkit-scrollbar{width:2px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:rgba(255,255,255,.08);border-radius:2px;}
 </style>
 </head>
 <body>
-
 <div id="app">
-  <header class="app-header">
-    <div class="logo">
-      <div class="logo-pulse"></div>
-      <div>
-        <div class="logo-text">NeoWatch</div>
-        <div class="logo-sub">Training Hub</div>
-      </div>
+
+<header class="app-header">
+  <div class="logo">
+    <div class="logo-mark">
+      <div class="live-dot"></div>
+      <svg viewBox="0 0 24 24" fill="none" stroke="var(--live)" stroke-width="2" stroke-linecap="round"><path d="M3 12h3l3-7 4 14 3-9 2 2h3"/></svg>
     </div>
-    <div class="header-badge" id="offlineBadge">LIVE</div>
-  </header>
-
-  <div id="pages">
-
-    <div class="page active" id="page-anatomy">
-      <div class="section-header">
-        <div class="section-title">Digital Anatomy</div>
-        <div class="section-sub">System architecture, justifications, and failure modes.</div>
-      </div>
-      <div id="anatomy-list"></div>
+    <div>
+      <div class="logo-name">NeoWatch</div>
+      <div class="logo-sub">Training Hub · NW-001</div>
     </div>
+  </div>
+  <div class="status-badge" id="offlineBadge">● LIVE</div>
+</header>
 
-    <div class="page" id="page-replace">
-      <div class="section-header">
-        <div class="section-title">Replace Guide</div>
-        <div class="section-sub">Standard operating procedures for hardware swapping.</div>
-      </div>
-      <div class="comp-select-grid" id="replaceGrid"></div>
-      <div class="replace-panel" id="replacePanel">
-        <div class="replace-header">
-          <div class="replace-comp-name" id="rp-name">—</div>
-        </div>
-        <div class="tools-section">
-          <div class="info-label">Required Tools</div>
-          <div class="tools-flex" id="rp-tools"></div>
-        </div>
-        <div id="rp-steps"></div>
-      </div>
-    </div>
+<div id="pages">
 
-    <div class="page" id="page-diagnose">
-      <div class="section-header">
-        <div class="section-title">Diagnostics</div>
-        <div class="section-sub">Root cause analysis for critical failures.</div>
-      </div>
-      <div class="fault-tabs" id="faultTabs"></div>
-      <div id="scenarioContainer"></div>
-    </div>
-
-    <div class="page" id="page-ai">
-      <div class="section-header">
-        <div class="section-title">Co-Pilot</div>
-        <div class="section-sub">AI-assisted diagnosis based on system telemetry.</div>
-      </div>
-      <div class="copilot-context">
-        <span style="color: var(--text); font-weight: 600;">System Context: NW-001</span><br>
-        Architecture and baseline parameters loaded. Safe to initiate query.
-      </div>
-      <div class="quick-prompts">
-        <button class="quick-btn" onclick="quickPrompt(this)"><i data-lucide="thermometer-snowflake" class="nav-icon"></i> PID 100% but temp falling</button>
-        <button class="quick-btn" onclick="quickPrompt(this)"><i data-lucide="flame" class="nav-icon"></i> Temp rising while powered off</button>
-        <button class="quick-btn" onclick="quickPrompt(this)"><i data-lucide="monitor-off" class="nav-icon"></i> LCD is blank</button>
-      </div>
-      <div class="chat-window" id="chatWindow"></div>
-      <div class="chat-input-row">
-        <input class="chat-input" id="chatInput" type="text" placeholder="Describe symptoms..." autocomplete="off"/>
-        <button class="chat-send" id="sendBtn" onclick="sendMessage()"><i data-lucide="send" style="width:18px;height:18px;"></i></button>
-      </div>
-    </div>
-
-    <div class="page" id="page-3d">
-      <div class="section-header">
-        <div class="section-title">Spatial Field</div>
-        <div class="section-sub">Interactive 3D component mapping.</div>
-      </div>
-      <button class="launch-3d-btn" onclick="launch3D()">Initialize Render</button>
-      <div class="threejs-slot" id="threejsSlot">
-        <i data-lucide="box" style="width: 48px; height: 48px; color: var(--border-lit); margin-bottom: 1rem;"></i>
-        <div style="font-size: 0.85rem; color: var(--muted);">Canvas inactive.</div>
-      </div>
-    </div>
-
+  <div class="page active" id="page-anatomy">
+    <div class="ph"><div class="ph-label">Module 01</div><div class="ph-title">Digital Anatomy</div><div class="ph-sub">Tap any component to see its role, engineering justification, and failure behaviour.</div></div>
+    <div id="anatomy-list"></div>
   </div>
 
-  <nav class="bottom-nav">
-    <button class="nav-btn active" onclick="navigate('anatomy',this)">
-      <i data-lucide="cpu" class="nav-icon"></i><span>Anatomy</span>
-    </button>
-    <button class="nav-btn" onclick="navigate('replace',this)">
-      <i data-lucide="wrench" class="nav-icon"></i><span>Replace</span>
-    </button>
-    <button class="nav-btn" onclick="navigate('diagnose',this)">
-      <i data-lucide="activity" class="nav-icon"></i><span>Diagnose</span>
-    </button>
-    <button class="nav-btn" onclick="navigate('ai',this)">
-      <i data-lucide="bot" class="nav-icon"></i><span>Co-Pilot</span>
-    </button>
-    <button class="nav-btn" onclick="navigate('3d',this)">
-      <i data-lucide="box" class="nav-icon"></i><span>3D</span>
-    </button>
-  </nav>
+  <div class="page" id="page-replace">
+    <div class="ph"><div class="ph-label">Module 02</div><div class="ph-title">Replace Guide</div><div class="ph-sub">Select a component to see the full step-by-step replacement procedure.</div></div>
+    <div class="comp-grid" id="replaceGrid"></div>
+    <div class="rp-panel" id="replacePanel">
+      <div class="rp-head">
+        <svg id="rp-icon" viewBox="0 0 24 24" fill="none" stroke="var(--live)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></svg>
+        <div class="rp-title" id="rp-name">—</div>
+      </div>
+      <div class="rp-tools" id="rp-tools"></div>
+      <div class="rp-steps" id="rp-steps"></div>
+    </div>
+  </div>
+
+  <div class="page" id="page-diagnose">
+    <div class="ph"><div class="ph-label">Module 03</div><div class="ph-title">Diagnostic Engine</div><div class="ph-sub">Select a fault scenario, study the readings, identify the root cause, then reveal the fix.</div></div>
+    <div class="ftabs" id="faultTabs"></div>
+    <div id="scenarioContainer"></div>
+  </div>
+
+  <div class="page" id="page-ai">
+    <div class="ph"><div class="ph-label">Module 04</div><div class="ph-title">AI Co-Pilot</div><div class="ph-sub">Describe any symptom — the Co-Pilot guides you to the root cause using Claude AI.</div></div>
+    <div class="ai-ctx"><strong>Context: Smart Neonatal Warmer NW-001</strong>Full architecture, component specs, clinical thresholds, and failure modes are loaded. Ask anything.</div>
+    <div class="quick-list" id="quickList"></div>
+    <div class="chat-win" id="chatWindow">
+      <div class="chat-welcome">
+        <div class="chat-welcome-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="7" y="7" width="10" height="10" rx="2"/><path d="M7 9H4M7 12H4M7 15H4M17 9h3M17 12h3M17 15h3M9 7V4M12 7V4M15 7V4M9 17v3M12 17v3M15 17v3"/></svg></div>
+        Type a symptom or tap a quick prompt above.<br>The Co-Pilot understands your warmer's full architecture.
+      </div>
+    </div>
+    <div class="chat-row">
+      <input class="chat-in" id="chatInput" type="text" placeholder="Describe the symptom…" autocomplete="off"/>
+      <button class="chat-send" id="sendBtn" onclick="sendMessage()">Send</button>
+    </div>
+  </div>
+
+  <div class="page" id="page-3d">
+    <div class="ph"><div class="ph-label">Module 05</div><div class="ph-title">3D Field Training</div><div class="ph-sub">Rotate the warmer, tap components, and diagnose faults in 3D space.</div></div>
+    <button class="btn-3d" onclick="launch3D()">Launch 3D Scene →</button>
+    <div class="slot-3d" id="threejsSlot">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3L2 8l10 5 10-5-10-5zM2 16l10 5 10-5M2 12l10 5 10-5"/></svg>
+      <div class="slot-t">3D Scene mounts here</div>
+      <div class="slot-d">The Three.js scene from 06_ar_training.html plugs directly into this slot. Tap Launch above.</div>
+      <div class="slot-badge">THREE.JS READY SLOT</div>
+    </div>
+    <div class="comp-card" style="margin-top:.5rem">
+      <div class="card-strip" style="background:#D0ACFF"></div>
+      <div class="card-main">
+        <div class="card-top" onclick="toggleCard(this)">
+          <div class="card-icon-wrap" style="background:rgba(208,172,255,0.1);border:1px solid rgba(208,172,255,0.2)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#D0ACFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+          </div>
+          <div class="card-identity"><div class="card-name">How to plug in the 3D scene</div><div class="card-spec">Developer note</div></div>
+          <div class="card-chevron"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></div>
+        </div>
+        <div class="card-body"><div class="info-block"><div class="info-txt">Replace the <code style="color:var(--live);font-family:var(--mono)">#threejsSlot</code> div with the Three.js canvas from <code style="font-family:var(--mono)">06_ar_training.html</code>. Move the Three.js script and component data into this file's script block.</div></div></div>
+      </div>
+    </div>
+  </div>
 </div>
 
+<nav class="bottom-nav">
+  <button class="nav-btn active" onclick="navigate('anatomy',this)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><rect x="7" y="7" width="10" height="10" rx="2"/><path d="M7 9H4M7 12H4M7 15H4M17 9h3M17 12h3M17 15h3M9 7V4M12 7V4M15 7V4M9 17v3M12 17v3M15 17v3"/></svg>
+    <span>Anatomy</span>
+  </button>
+  <button class="nav-btn" onclick="navigate('replace',this)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+    <span>Replace</span>
+  </button>
+  <button class="nav-btn" onclick="navigate('diagnose',this)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+    <span>Diagnose</span>
+  </button>
+  <button class="nav-btn" onclick="navigate('ai',this)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="7" width="10" height="10" rx="3"/><path d="M9.5 2a2.5 2.5 0 0 1 5 0M9.5 22a2.5 2.5 0 0 0 5 0M4.5 9.5A2.5 2.5 0 0 0 2 12a2.5 2.5 0 0 0 2.5 2.5M19.5 9.5A2.5 2.5 0 0 1 22 12a2.5 2.5 0 0 1-2.5 2.5"/></svg>
+    <span>Co-Pilot</span>
+  </button>
+  <button class="nav-btn" onclick="navigate('3d',this)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+    <span>3D Field</span>
+  </button>
+</nav>
+</div>
 <div class="toast" id="toast"></div>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
-// ════════════════════════════════════════════════════════════════════════════
-//  DATA REWRITTEN WITH LUCIDE ICONS
-// ════════════════════════════════════════════════════════════════════════════
+// ── SVG ICON PATHS (inner content only, inserted into <svg> wrappers) ──
+const ICONS = {
+  esp32:   `<rect x="7" y="7" width="10" height="10" rx="2"/><path d="M7 9H4M7 12H4M7 15H4M17 9h3M17 12h3M17 15h3M9 7V4M12 7V4M15 7V4M9 17v3M12 17v3M15 17v3"/>`,
+  ds18b20: `<path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"/>`,
+  ssr:     `<rect x="2" y="6" width="20" height="12" rx="2"/><path d="M7 10l2 2-2 2M13 10l2 2-2 2"/><line x1="2" y1="12" x2="5" y2="12"/><line x1="19" y1="12" x2="22" y2="12"/>`,
+  heater:  `<path d="M12 2c0 3-2 3-2 6s2 3 2 6-2 3-2 6M18 2c0 3-2 3-2 6s2 3 2 6-2 3-2 6M6 2c0 3-2 3-2 6s2 3 2 6-2 3-2 6"/>`,
+  bimetal: `<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/>`,
+  sdcard:  `<path d="M20 19V8.5L14.5 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2z"/><line x1="9" y1="13" x2="9" y2="17"/><line x1="12" y1="11" x2="12" y2="17"/><line x1="15" y1="13" x2="15" y2="17"/>`,
+  lcd:     `<rect x="2" y="4" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="18" x2="12" y2="21"/><line x1="6" y1="9" x2="10" y2="9"/><line x1="6" y1="12" x2="12" y2="12"/>`,
+  buzzer:  `<polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07M19.07 4.93a10 10 0 0 1 0 14.14"/>`,
+  buck:    `<path d="M5 12h14M12 5l7 7-7 7"/><circle cx="5" cy="12" r="2"/><circle cx="19" cy="12" r="2"/>`,
+  battery: `<rect x="2" y="7" width="18" height="10" rx="1"/><path d="M22 11v2"/><line x1="6" y1="12" x2="10" y2="12"/><line x1="12" y1="10" x2="12" y2="14"/>`,
+  mqtt:    `<path d="M1 6l11 6 11-6M1 12l11 6 11-6"/><circle cx="12" cy="3" r="1"/>`,
+  // fault banner icons
+  thermal:   `<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>`,
+  emergency: `<path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>`,
+  sensor:    `<path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"/><line x1="18" y1="2" x2="22" y2="2"/><line x1="20" y1="0" x2="20" y2="4"/>`,
+  power:     `<path d="M18.36 6.64a9 9 0 1 1-12.73 0"/><line x1="12" y1="2" x2="12" y2="12"/>`,
+  data:      `<path d="M20 19V8.5L14.5 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2z"/><line x1="9" y1="13" x2="9" y2="17"/><line x1="12" y1="11" x2="12" y2="17"/><line x1="15" y1="13" x2="15" y2="17"/>`,
+};
+
+function icon(key, color, size=20) {
+  return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="${color||'currentColor'}" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">${ICONS[key]||''}</svg>`;
+}
+
+// ── DATA ──
 const COMPONENTS = [
-  {id:'esp32', icon:'cpu', color:'var(--purple)', name:'ESP32-WROOM', code:'Dual-Core 240 MHz', role:'Central microcontroller. Runs PID on Core 0, Wi-Fi/MQTT on Core 1. Dual-core prevents Wi-Fi timeouts from stalling the heater loop.', why:'Boots in <2s. Native Wi-Fi/Bluetooth. Hardware watchdog timer auto-resets on crash.', fails:'No display/response: check 5V buck converter. Repeated resets: watchdog timeout.', cost:'₦4,500', tools:['M3 screwdriver','Multimeter'], steps:[{t:'Power down',b:'Disconnect 12V terminal. Confirm 0V on VIN.'},{t:'Remove peripherals',b:'Disconnect DS18B20, SSR control, SPI, I2C.'},{t:'Flash firmware',b:'Flash replacement via PlatformIO before fitting.'}]},
-  {id:'ds18b20', icon:'thermometer', color:'var(--green)', name:'DS18B20 × 2', code:'1-Wire Digital', role:'Measures skin temp (PID input) and ambient temp. Shared data wire via 1-Wire protocol.', why:'Digital output eliminates ADC drift. ±0.5°C accuracy meets IEC 60601-2-21.', fails:'Returns -127°C if disconnected. Check 4.7kΩ pull-up resistor.', cost:'₦800', tools:['Multimeter','Scanner sketch'], steps:[{t:'Identify fault',b:'Check Serial for failed ROM address.'},{t:'Disconnect',b:'Remove from GPIO4 pull-up bus.'},{t:'Update ROM',b:'Scan new sensor address and update config.h.'}]},
-  {id:'ssr', icon:'zap', color:'var(--red)', name:'SSR-40DA', code:'Solid State Relay', role:'Switches 12V to heater via GPIO5 PWM. Silent, no moving parts.', why:'40A rating gives massive safety margin for 8A heater. Zero-crossing switching.', fails:'Open failure: heater stays off. Closed failure (EMERGENCY): heater stays on continuously.', cost:'₦3,500', tools:['M4 screwdriver','Thermal paste'], steps:[{t:'EMERGENCY check',b:'If PID=0% but temp rising, cut power instantly.'},{t:'Test state',b:'Near-zero ohms on load without signal = shorted.'},{t:'Mount',b:'Apply thermal paste. Bolt firmly to heatsink.'}]},
-  {id:'heater', icon:'flame', color:'var(--amber)', name:'Nichrome Heater', code:'100W 12V DC', role:'Converts power to heat. PID varies duty cycle (0-100%).', why:'Stable resistance under thermal load. 12V DC eliminates mains AC risk inside chassis.', fails:'Wire oxidation increases resistance over time. Physical break = open circuit.', cost:'₦1,200', tools:['Multimeter','Gloves'], steps:[{t:'Cool down',b:'Wait 2 mins after power off.'},{t:'Measure',b:'Healthy = ~1.44Ω. Open = broken.'},{t:'Replace',b:'Ensure coil does not touch enclosure walls.'}]},
-  {id:'bimetal', icon:'shield-alert', color:'var(--amber)', name:'Bimetal Cutoff', code:'38.5°C N/C Hardware', role:'Hardware safety layer in series with heater. Physically breaks circuit at 38.5°C.', why:'IEC standard mandates protection independent of software.', fails:'Fails open after thermal cycling. Requires manual reset if tripped.', cost:'₦600', tools:['Multimeter'], steps:[{t:'Test',b:'Should be near-zero ohms at room temp.'},{t:'Reset',b:'Press manual reset button if equipped.'}]},
-  {id:'sdcard', icon:'database', color:'var(--blue)', name:'SD Module', code:'SPI FAT32 Buffer', role:'Local buffer for Store-and-Forward telemetry during network outages.', why:'Prevents data loss in unstable hospital networks.', fails:'SPI disconnect or file system corruption.', cost:'₦1,300', tools:['Laptop','Card reader'], steps:[{t:'Inspect',b:'Check for corrosion. Format FAT32.'},{t:'Test SPI',b:'Verify GPIO18, 19, 23, 15 connections.'}]},
-  {id:'lcd', icon:'monitor', color:'var(--blue)', name:'LCD 16×2', code:'I2C Backpack (0x27)', role:'Local UI. Alternates temp/PID and system status.', why:'I2C backpack reduces wiring to 4 pins. Critical for offline monitoring.', fails:'Blank screen: adjust contrast pot. Garbled: check I2C address.', cost:'₦1,500', tools:['Screwdriver','I2C scanner'], steps:[{t:'Scan',b:'Run I2C scanner to confirm address.'},{t:'Contrast',b:'Turn blue potentiometer on backpack.'}]},
-  {id:'buck', icon:'plug', color:'var(--purple)', name:'LM2596 Buck', code:'12V to 5V DC-DC', role:'Steps down battery voltage for MCU and logic components.', why:'High efficiency switching reduces heat vs linear regulators.', fails:'0V output kills system. Check trim pot setting.', cost:'₦1,000', tools:['Multimeter'], steps:[{t:'Measure Input',b:'Confirm 12V present.'},{t:'Adjust',b:'Turn trim pot to exactly 5.0V output.'}]},
-  {id:'battery', icon:'battery-charging', color:'var(--text)', name:'12V 7Ah SLA', code:'Sealed Lead Acid', role:'Provides ~4hrs backup power during grid failures.', why:'Tolerates deep discharge better than Lithium. No fire risk.', fails:'Voltage drops below 11.5V quickly under load.', cost:'₦8,500', tools:['Multimeter','Charger'], steps:[{t:'Load test',b:'Apply 2A load, monitor voltage drop.'},{t:'Replace',b:'Disconnect negative terminal first.'}]}
+  {id:'esp32',  color:'#7C5CBF',name:'ESP32-WROOM-32',  spec:'Espressif · Dual-Core 240 MHz · 520KB SRAM',
+   role:'The central microcontroller. Runs the PID temperature control algorithm on Core 0 and handles Wi-Fi, MQTT, SD card, LCD, and buzzer management on Core 1. The dual-core design is essential: if both tasks shared one core, a Wi-Fi timeout could stall the PID loop, leaving the heater at its last duty cycle — dangerous for a neonate.',
+   why:'Boots in under 2 seconds after power loss. Native Wi-Fi and Bluetooth eliminates external modules. Hardware watchdog timer auto-resets if firmware crashes. 520 KB SRAM handles all concurrent tasks. Costs NGN 4,500 versus NGN 25,000+ for equivalent STM32 + Wi-Fi module.',
+   fails:'If the device shows no display and no response, check 5V from the buck converter first. GPIO pins can be damaged by ESD — always ground yourself. Serial monitor showing repeated resets indicates watchdog timeout — check for infinite loops in firmware.',
+   cost:'NGN 4,500',tools:['M3 screwdriver','multimeter','USB cable','laptop + PlatformIO'],
+   steps:[{t:'Power down completely',b:'Disconnect 12V battery terminal. Confirm 0V on ESP32 VIN pin. Wait 30 seconds for capacitors to discharge.'},{t:'Photograph all wiring',b:'Take a clear photo of all GPIO connections before removing anything. Label unlabelled wires with tape.'},{t:'Remove peripherals first',b:'Disconnect DS18B20 (GPIO4), SSR control (GPIO5), SD card SPI, LCD I2C (GPIO21/22), buzzer (GPIO2).'},{t:'Remove power pins last',b:'Disconnect VIN (5V) and GND. Slide or unsolder ESP32 module from its position.'},{t:'Flash firmware before fitting',b:'Flash firmware onto replacement using PlatformIO. Verify it boots and prints to Serial at 115200 baud.'},{t:'Reconnect and verify',b:'Connect power first, then peripherals in reverse order. Open Serial monitor and confirm all modules initialise.'}]},
+  {id:'ds18b20',color:'#2DA44E',name:'DS18B20 × 2',     spec:'Maxim · 1-Wire · ±0.5°C · 12-bit',
+   role:'Two sensors are installed: one measures neonatal skin temperature (the PID input) and one measures ambient enclosure temperature (reference). They share a single data wire using the 1-Wire protocol. Each has a unique 64-bit ROM address so the ESP32 addresses them individually on the same bus.',
+   why:'Accurate to ±0.5°C — IEC 60601-2-21 requires ≤ ±0.5°C. 12-bit resolution gives 0.0625°C steps. Digital output eliminates ADC drift. Waterproof stainless steel probe suitable for direct skin contact. Cost: NGN 800 each.',
+   fails:'Returns -127°C if disconnected — firmware detects this as a CRC error and disables heater. Returns 85°C on first power-up (normal, wait 1 second). Erratic readings: check the 4.7kΩ pull-up resistor to 3.3V. Broken data wire is the most common physical failure.',
+   cost:'NGN 800 each',tools:['Multimeter','sensor scanner sketch','isopropyl alcohol','USB cable'],
+   steps:[{t:'Identify which sensor failed',b:'Check Serial monitor — firmware logs which ROM address returned an error. Photograph cable routing before removal.'},{t:'Disconnect data wire from GPIO4',b:'The data wire connects to ESP32 GPIO4 through the 4.7kΩ pull-up resistor on the 1-Wire bus.'},{t:'Remove the sensor',b:'If probe-type: unscrew mounting bracket. If surface-mounted: carefully desolder. Note probe length and routing.'},{t:'Find new sensor ROM address',b:'Run a 1-Wire scanner sketch — it prints the unique 64-bit address. Update SENSOR_SKIN_ADDR in config.h.'},{t:'Test before closing',b:'Power on. Serial monitor should show both sensor addresses found and temperatures within plausible range.'}]},
+  {id:'ssr',    color:'#C0392B',name:'SSR-40DA',         spec:'Solid State Relay · 3–32V DC ctrl · 40A load',
+   role:'Acts as the power switch between the ESP32 control signal and the heater element. GPIO5 outputs a PWM signal. When PWM is high, the SSR closes and full voltage reaches the heater. No moving parts — switches silently without arc or wear.',
+   why:'Rated 40A — far above the 8A the 100W heater draws. Zero-crossing switching reduces electromagnetic interference in the clinical environment. Rated for 100 million operations versus 1 million for mechanical relay.',
+   fails:'Open failure: heater stays off, PID hits 100%, THERMAL LOW alarm fires. Closed failure (dangerous): SSR shorts permanently — heater stays on even with 0% control signal. Cut all power immediately if this occurs.',
+   cost:'NGN 3,500',tools:['M4 screwdriver','multimeter','thermal paste','replacement SSR-40DA'],
+   steps:[{t:'EMERGENCY: if SSR is shorted',b:'If PID=0% and temperature still rises, cut all power immediately. Move patient. Do not wait for the bimetal cutoff.'},{t:'Confirm fault mode with multimeter',b:'Power off. Check load terminals: near-zero ohms with no signal = shorted. Open circuit with signal present = open failure.'},{t:'Photograph load wiring',b:'Load wires carry high current. Photograph and label before disconnecting.'},{t:'Disconnect load then control wires',b:'Loosen load terminal screws first, then control terminal screws.'},{t:'Apply thermal paste and mount',b:'Apply thermal paste between SSR and heatsink. Bolt in place firmly — poor thermal contact causes premature failure.'},{t:'Test before connecting heater',b:'Apply 3.3V to control+. Verify load terminals close. Only then reconnect heater element.'}]},
+  {id:'heater', color:'#E36209',name:'Nichrome Heater',  spec:'100W · 12V DC · Resistance Wire',
+   role:'Converts electrical power to heat. The PID controller varies the duty cycle (0–100%) to control heat output precisely. At 18% duty cycle (typical steady-state), 18W is produced. At 100%, the full 100W is produced.',
+   why:'Nichrome (nickel-chromium) has stable resistance that changes minimally with temperature — critical for PID accuracy. High melting point (1400°C) and oxidation resistance. 12V DC eliminates need for mains AC wiring inside the prototype.',
+   fails:'Resistance increases as wire ages — produces less heat per watt, PID compensates with higher duty cycle. Complete failure: wire breaks, resistance reads infinite. Healthy 100W 12V element reads approximately 1.44Ω.',
+   cost:'NGN 1,200',tools:['Multimeter','heat-resistant gloves','M3 screwdriver','replacement element'],
+   steps:[{t:'Power down and wait 2 minutes',b:'The element retains heat after power off. Do not touch until cooled. Confirm 0V across heater terminals.'},{t:'Measure resistance of old element',b:'A healthy 100W 12V element reads ≈1.44Ω. Values above 2Ω confirm degradation.'},{t:'Disconnect both heater terminals',b:'Note which terminal connects to SSR Load− and which to bimetal cutoff. Label before removing.'},{t:'Remove element from mounting',b:'Slide out of bracket. Ensure replacement has identical wattage and voltage rating.'},{t:'Verify before powering on',b:'Check replacement reads ≈1.44Ω and has no short to chassis ground.'}]},
+  {id:'bimetal',color:'#D29922',name:'Bimetal Cutoff',   spec:'38.5°C N/C · Hardware Safety · IEC 60601-2-21',
+   role:'A purely mechanical safety device wired in series with the heater element. Below 38.5°C it is closed — current flows normally. Above 38.5°C, the bimetal strip bends and physically breaks the circuit. Operates completely independently of all firmware and software.',
+   why:'Required by IEC 60601-2-21: the standard for infant radiant warmers mandates a hardware thermal cutoff independent of the microcontroller. This provides a last-resort protection layer that no software failure can bypass.',
+   fails:'Open failure after repeated thermal cycling: reads open circuit at room temperature even though it should be closed. Resistance should read near-zero ohms at room temperature. Replace every 5 years preventively.',
+   cost:'NGN 600',tools:['Multimeter','M2 screwdriver','replacement 38.5°C N/C bimetal thermostat'],
+   steps:[{t:'Test at room temperature',b:'Should read near-zero ohms (closed circuit). If reads open at room temp: has tripped or failed.'},{t:'Attempt manual reset',b:'Some bimetal switches have a small reset button. With device cooled below 25°C, press reset button firmly. Retest.'},{t:'Replace if failed open permanently',b:'Disconnect bimetal from heater circuit. Replace with identical trip temperature (38.5°C) and current rating.'},{t:'Verify correct installation',b:'Confirm bimetal is in series — not parallel — with heater element. Wrong wiring bypasses the safety function.'}]},
+  {id:'sdcard', color:'#1F6FEB',name:'SD Card Module',   spec:'SPI · FAT32 · Store-and-Forward Buffer',
+   role:'Provides persistent local storage for the Store-and-Forward system. Every telemetry reading is written to the SD card regardless of Wi-Fi availability, stored as JSON Lines in telemetry.jsonl. When connectivity restores, firmware uploads to Supabase in batches of 50.',
+   why:'Nigerian hospitals have unreliable internet. Without local buffering, entire shifts of patient monitoring data would be lost every time Wi-Fi dropped. FAT32 format is readable on any laptop for emergency data recovery.',
+   fails:'Not detected: check SPI wiring (GPIO18=CLK, GPIO19=MISO, GPIO23=MOSI, GPIO15=CS). Card must be FAT32 — not exFAT or NTFS. Cards fail after many repeated small writes — replace every 2 years.',
+   cost:'NGN 500 (module) + NGN 800 (card)',tools:['Laptop','SD card reader','multimeter'],
+   steps:[{t:'Remove and inspect card',b:'Eject card. Check for corrosion on contacts. Clean with isopropyl alcohol on a cotton swab. Try reseating.'},{t:'Test on laptop',b:'Insert into laptop. If not visible in File Explorer, card has failed. If visible, confirm FAT32 format.'},{t:'Format if needed',b:'Windows: right-click card → Format → FAT32 → Quick Format. Create empty telemetry.jsonl to verify write access.'},{t:'Verify SPI wiring',b:'GPIO18=CLK, GPIO19=MISO, GPIO23=MOSI, GPIO15=CS. A loose CS wire causes the most common initialisation failures.'}]},
+  {id:'lcd',    color:'#388BFD',name:'LCD 16×2 I2C',     spec:'PCF8574 · 0x27 · SDA:GPIO21 SCL:GPIO22',
+   role:'Provides the local user interface at the bedside. Alternates between two screens every 3 seconds: Screen A shows temperature, setpoint, and PID effort; Screen B shows Wi-Fi status, offline buffer count, and alarm state.',
+   why:'The PCF8574 I2C backpack reduces wiring to 4 wires (VCC, GND, SDA, SCL) instead of 7+ for parallel operation. Fewer wires means fewer connection failures in a device handled by multiple staff over years.',
+   fails:'Blank display: check contrast potentiometer (small blue screw on backpack). Garbled characters: try I2C address 0x3F if 0x27 fails. No response: verify SDA=GPIO21, SCL=GPIO22.',
+   cost:'NGN 1,500',tools:['Small flathead screwdriver','I2C scanner sketch'],
+   steps:[{t:'Run I2C scanner sketch',b:'Upload I2C scanner to ESP32. Open Serial monitor. It prints the address of all I2C devices. Update LCD_I2C_ADDR if different from 0x27.'},{t:'Adjust contrast potentiometer',b:'Turn the small blue potentiometer on the I2C backpack. Start counter-clockwise then slowly clockwise until characters appear.'},{t:'Check SDA and SCL wiring',b:'SDA = GPIO21, SCL = GPIO22. Swap if accidentally reversed.'},{t:'Replace module if screen damaged',b:'Disconnect 4 wires. Replace entire LCD+backpack. Re-run I2C scanner to confirm address.'}]},
+  {id:'buzzer', color:'#607A8E',name:'Active Buzzer',     spec:'5V DC · GPIO2 via 100Ω · 500ms pattern',
+   role:'Provides the audible alarm when temperature crosses ALARM_HIGH (38°C) or ALARM_LOW (35°C), or when a sensor fault is detected. The intermittent 500ms on/off pattern distinguishes it from continuous background noise.',
+   why:'Active buzzer contains its own oscillator — the ESP32 only sets GPIO HIGH or LOW. A passive buzzer would require PWM at the correct frequency, adding firmware complexity. The 100Ω series resistor limits current to safe GPIO2 levels.',
+   fails:'No sound during alarm: check GPIO2 toggles with multimeter in AC mode (should read ~1.6V average). Test buzzer independently by applying 5V to its terminals.',
+   cost:'NGN 300',tools:['Multimeter','5V test power supply','replacement 5V active buzzer'],
+   steps:[{t:'Confirm GPIO2 is toggling',b:'During active alarm, measure GPIO2 with multimeter on AC voltage. Should read approximately 1.6V.'},{t:'Test buzzer in isolation',b:'Disconnect from circuit. Apply 5V to (+) pin. Active buzzer sounds immediately. No sound = buzzer has failed.'},{t:'Check 100Ω series resistor',b:'Measure resistance between GPIO2 and buzzer positive terminal. Should read approximately 100Ω.'},{t:'Fit replacement',b:'Observe polarity marking (+). Reconnect with correct orientation. Test alarm triggering before closing enclosure.'}]},
+  {id:'buck',   color:'#1158C7',name:'LM2596 Buck',       spec:'12V → 5V · DC-DC · 3A Rated · Adjustable',
+   role:'Steps down the 12V battery supply to the 5V required by the ESP32, LCD, SD card module, and buzzer. A switching (buck) converter is used instead of a linear regulator — a linear regulator would waste the 7V difference entirely as heat inside the clinical enclosure.',
+   why:'LM2596 efficiency is 75–90% versus ~40% for a linear regulator at this voltage ratio. In a battery-powered device this directly extends patient monitoring runtime. The trim potentiometer allows precise output adjustment.',
+   fails:'Output voltage low or zero: measure input first — if 12V is present, converter has failed. Output ripple causing ESP32 resets: check 1000µF output capacitor for bulging.',
+   cost:'NGN 1,000',tools:['Multimeter (DC voltage)','small screwdriver','replacement LM2596 module'],
+   steps:[{t:'Measure output voltage',b:'Place multimeter probes on output terminals. Target is 5.0V ± 0.1V. If outside range, adjust trim potentiometer.'},{t:'Confirm input is 12V',b:'Measure input terminals. If 0V: battery or connection has failed — not the converter.'},{t:'Adjust trim potentiometer',b:'Clockwise typically increases output voltage. Target exactly 5.00V — ESP32 is sensitive to overvoltage.'},{t:'Replace if output is unstable or zero',b:'Note 4 connections: Vin+, Vin−, Vout+, Vout−. Re-adjust output to 5.0V before connecting any load.'}]},
+  {id:'battery',color:'#7A5C3C',name:'12V 7Ah SLA',       spec:'Sealed Lead Acid · Maintenance-Free · 20hr Rate',
+   role:'Provides backup power during mains electricity failures. At typical operating current (~1.5A), the 7Ah battery provides approximately 4 hours of autonomous operation. The warmer continues with zero interruption during mains-to-battery transition.',
+   why:'SLA batteries are widely available throughout Nigeria and require no special charging circuitry. They tolerate deep discharge better than lithium-ion without permanent damage and pose no fire risk if punctured — important in a clinical environment.',
+   fails:'Reduced runtime: capacity degrades after 200–300 charge cycles or 3–5 years. A healthy 7Ah battery should hold above 11.5V for at least 3 hours under 2A load. Never discharge below 10.5V — causes permanent sulfation.',
+   cost:'NGN 8,500',tools:['Multimeter','load resistors','SLA smart charger','gloves'],
+   steps:[{t:'Test capacity under load',b:'Fully charge. Apply 2A load. Time until voltage drops below 11.5V. Should be at least 3 hours for healthy 7Ah.'},{t:'Clean terminals if corroded',b:'Mix 1 teaspoon baking soda in 250ml water. Brush terminals. Rinse with clean water. Dry completely.'},{t:'Disconnect negative terminal first',b:'Always disconnect (−) before (+) to prevent short circuit sparks near the battery.'},{t:'Fit replacement and initial charge',b:'Connect (+) first, then (−). Charge for at least 12 hours before first use.'}]},
+  {id:'mqtt',   color:'#8957E5',name:'MQTT Broker',        spec:'Mosquitto TLS · Port 8883 · Supabase Bridge',
+   role:'The MQTT broker acts as the message hub between the ESP32 and the Supabase cloud database. The ESP32 publishes a JSON telemetry record every 5 seconds to the topic nw001/telemetry. The publish-subscribe model means multiple dashboards can receive the same data simultaneously.',
+   why:'MQTT was designed for unreliable networks with low bandwidth — exactly the conditions of rural Nigerian hospitals. A 5-second telemetry record is approximately 200 bytes. MQTT QoS Level 1 ensures delivery acknowledgement. TLS encryption protects patient data in transit.',
+   fails:'ESP32 cannot connect: check Wi-Fi is active first, then check broker URL and port in config.h. Readings not appearing in dashboard: check MQTT topic names match between firmware and Supabase bridge.',
+   cost:'NGN 0 (open source)',tools:['Laptop with MQTT Explorer','network access'],
+   steps:[{t:'Test broker connectivity',b:'Install MQTT Explorer. Connect to broker URL. Subscribe to nw001/# and confirm messages arrive every 5 seconds.'},{t:'Check Supabase bridge logs',b:'Supabase Dashboard → Edge Functions → Logs. Messages should show ingestion every 5 seconds when device is online.'},{t:'Verify TLS certificate',b:'If connection refused: confirm port is 8883 (TLS) not 1883 (plain). Check certificate has not expired.'}]},
 ];
 
 const FAULTS = [
-  {label:'Heater Fault',type:'CRITICAL',title:'Temp falling despite 100% PID',context:'Patient is cold. Alarm sounding.',readings:[{l:'Temp',v:'33.8°C',cls:'bad'},{l:'Setpoint',v:'36.5°C',cls:'ok'},{l:'PID',v:'100%',cls:'warn'}],symptoms:'Controller maxed out, but no heat produced.',diagnosis:'Actuator failure. Heater element open circuit or SSR failed open.',fix:['Measure heater resistance (~1.44Ω)','Measure SSR output voltage']},
-  {label:'SSR Short',type:'EMERGENCY',title:'Temp rising with 0% PID',context:'System commanded OFF, but heating continues.',readings:[{l:'Temp',v:'38.3°C',cls:'bad'},{l:'Setpoint',v:'36.5°C',cls:'ok'},{l:'PID',v:'0%',cls:'ok'}],symptoms:'Patient at hyperthermia risk. System lost control of power state.',diagnosis:'SSR has fused closed.',fix:['Cut all power immediately.','Move patient.','Replace SSR-40DA.']},
-  {label:'Sensor Loss',type:'INTERLOCK',title:'Skin sensor disconnected',context:'Heater auto-disabled for safety.',readings:[{l:'Temp',v:'FAULT',cls:'bad'},{l:'PID',v:'0%',cls:'ok'},{l:'CRC',v:'ERR',cls:'bad'}],symptoms:'Reading is -127°C. System halted.',diagnosis:'Physical disconnect on 1-Wire bus.',fix:['Check GPIO4 connection.','Verify 4.7kΩ pull-up resistor.']}
+  {label:'Heater Fail',iconKey:'thermal',type:'CRITICAL THERMAL FAULT',title:'Heater element has failed — temperature falling despite full PID output',context:'A nurse reports the baby feels cold. The warmer has been on for 20 minutes. The alarm buzzer is sounding.',
+   readings:[{l:'Temperature',v:'33.8',u:'°C',cls:'bad'},{l:'Setpoint',v:'36.5',u:'°C',cls:'ok'},{l:'PID Effort',v:'100',u:'%',cls:'warn'},{l:'Wi-Fi',v:'ONLINE',u:'',cls:'ok'}],
+   symptoms:'Temperature is 2.7°C below setpoint and still falling. PID output is at its maximum (100%). The alarm THERMAL LOW has fired. The device is working as designed — the fault is not in the software.',
+   diagnosis:'PID at 100% with falling temperature = the actuator is not responding. The nichrome heater element has either broken (open circuit) or the SSR is not receiving the control signal.',
+   fix:['Confirm PID=100% in Serial monitor — rules out firmware fault.','Measure resistance across heater element terminals. Healthy = ~1.44Ω. Open circuit = element wire is broken.','If element is intact, measure voltage across SSR load terminals during a PID cycle. No voltage = SSR has failed open.','Replace the faulty component. Move the baby to a working warmer immediately.']},
+  {label:'SSR Shorted',iconKey:'emergency',type:'EMERGENCY — HARDWARE FAILURE',title:'SSR failed closed — temperature rising with heater control at 0%',context:'The buzzer is sounding. The firmware has correctly cut the heater control signal to 0% — but temperature is still rising.',
+   readings:[{l:'Temperature',v:'38.3',u:'°C',cls:'bad'},{l:'Setpoint',v:'36.5',u:'°C',cls:'ok'},{l:'PID Effort',v:'0',u:'%',cls:'ok'},{l:'Wi-Fi',v:'ONLINE',u:'',cls:'ok'}],
+   symptoms:'Temperature is 1.8°C above setpoint and rising. PID output is 0% — the controller has correctly ordered the heater off. But the heater is still running. Patient is at immediate risk of hyperthermia.',
+   diagnosis:'PID=0% but temperature rises = the SSR has failed in the closed (shorted) position. It is passing current to the heater against the control signal. This is an emergency.',
+   fix:['IMMEDIATELY move the patient to another warming surface.','Cut all power to the device — disconnect mains and battery terminal.','After powering down: measure resistance across SSR load terminals. Near-zero ohms with no control signal = confirmed shorted SSR.','Replace SSR-40DA. Apply thermal paste to heatsink. Verify new SSR before reconnecting heater.','Document incident in maintenance_logs.']},
+  {label:'Sensor Fault',iconKey:'sensor',type:'SENSOR FAULT — HEATER DISABLED',title:'DS18B20 skin sensor disconnected — heater auto-shutdown',context:'The LCD shows a sensor fault. The buzzer is sounding in a different pattern. The heater has automatically shut off.',
+   readings:[{l:'Temperature',v:'FAULT',u:'',cls:'bad'},{l:'Setpoint',v:'36.5',u:'°C',cls:'ok'},{l:'PID Effort',v:'0',u:'%',cls:'ok'},{l:'Sensor CRC',v:'ERROR',u:'',cls:'bad'}],
+   symptoms:'DS18B20 is returning -127°C (DEVICE_DISCONNECTED). The firmware detected this as a CRC error and triggered ALARM_SENSOR_FAULT. The heater has been disabled.',
+   diagnosis:'The skin sensor has physically disconnected from the 1-Wire bus. This is almost always a wiring fault — the data wire (GPIO4) or GND has come loose from the sensor connector.',
+   fix:['Move patient to backup warmer to maintain thermal care while you diagnose.','Check the DS18B20 probe cable routing — look for where the cable may have been tugged or bent sharply.','Reconnect the data wire to the 1-Wire bus (GPIO4). Check the GND connection.','Check the 4.7kΩ pull-up resistor from data line to 3.3V — if missing or broken, 1-Wire communication fails.','Power cycle. Fault clears automatically when sensor returns valid readings.']},
+  {label:'No Power',iconKey:'power',type:'TOTAL POWER FAILURE',title:'Device completely dead — battery healthy but nothing powers on',context:'The device was working on the previous shift. Now there is no display, no buzzer, no response. Battery reads 12.4V — it is healthy.',
+   readings:[{l:'ESP32',v:'NO BOOT',u:'',cls:'bad'},{l:'LCD',v:'BLANK',u:'',cls:'bad'},{l:'Battery',v:'12.4',u:'V',cls:'ok'},{l:'5V Rail',v:'0.0',u:'V',cls:'bad'}],
+   symptoms:'Battery is healthy at 12.4V. Nothing downstream is powered. The 5V rail (output of the buck converter) reads 0V.',
+   diagnosis:'The LM2596 converts 12V to 5V. If it fails, the entire device loses power even though the battery is fine. Possible causes: trim potentiometer moved to zero, overcurrent caused thermal shutdown, component failed.',
+   fix:['Measure LM2596 input terminals: should read 12V. If 0V here, fault is in the battery wiring not the converter.','Measure LM2596 output terminals: if 0V with 12V input confirmed, the converter has failed.','Attempt potentiometer adjustment first: turn the trim pot slowly clockwise while measuring output.','If no output: replace LM2596 module. Set to 5.0V with no load first. Then connect to ESP32.']},
+  {label:'Data Loss',iconKey:'data',type:'DATA INTEGRITY WARNING',title:'SD card failed — Store-and-Forward disabled during Wi-Fi outage',context:"Wi-Fi has been down for 3 hours. The baby's temperature is stable. However the LCD shows \"Buf: FAIL\".",
+   readings:[{l:'Temperature',v:'36.5',u:'°C',cls:'ok'},{l:'PID Effort',v:'18.2',u:'%',cls:'ok'},{l:'Wi-Fi',v:'OFFLINE',u:'',cls:'warn'},{l:'SD Buffer',v:'FAILED',u:'',cls:'bad'}],
+   symptoms:'Warmer is clinically functional — PID is maintaining temperature correctly. The problem is data integrity: with both Wi-Fi and SD card unavailable, 3 hours of telemetry readings have not been stored anywhere.',
+   diagnosis:'SD card initialisation failed at startup. The firmware logged this to Serial but continued operating — clinical function is not affected. Cause is usually a formatting issue, loose SPI connection, or worn card.',
+   fix:['Remove the SD card and inspect for physical damage or corrosion.','Insert into laptop: must appear as a drive. If not, card has failed — replace.','If card appears: confirm it is formatted FAT32 (not exFAT). Reformat if needed.','Check SPI wiring: GPIO18=CLK, GPIO19=MISO, GPIO23=MOSI, GPIO15=CS.','Document the 3-hour data gap in maintenance_logs.']},
 ];
 
-// ════════════════════════════════════════════════════════════════════════════
-//  UI LOGIC & RENDERING
-// ════════════════════════════════════════════════════════════════════════════
-function renderIcons() { lucide.createIcons(); }
+const QUICK_PROMPTS = [
+  'The baby feels cold but the warmer shows 36°C',
+  'PID is at 100% but temperature keeps falling',
+  'Temperature is rising even though I turned the device off',
+  'The LCD is blank but the buzzer is working',
+];
 
-function navigate(pageId, btn){
-  if(navigator.vibrate) navigator.vibrate(10);
-  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
-  document.getElementById('page-'+pageId).classList.add('active');
+// ── NAVIGATION ──
+function navigate(pageId, btn) {
+  if (navigator.vibrate) navigator.vibrate(30);
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('page-' + pageId).classList.add('active');
   btn.classList.add('active');
 }
 
-function buildAnatomy(){
-  const list = document.getElementById('anatomy-list');
-  list.innerHTML = COMPONENTS.map(c => `
-    <div class="card" id="card-${c.id}">
-      <div class="card-header" onclick="toggleCard(this)">
-        <div class="card-left">
-          <div class="card-icon" style="background:var(--surface2);border:1px solid var(--border);"><i data-lucide="${c.icon}" style="color:${c.color};width:20px;height:20px;"></i></div>
-          <div><div class="card-name">${c.name}</div><div class="card-code">${c.code}</div></div>
+// ── ANATOMY ──
+function buildAnatomy() {
+  document.getElementById('anatomy-list').innerHTML = COMPONENTS.map(c => `
+    <div class="comp-card" id="card-${c.id}">
+      <div class="card-strip" style="background:${c.color}"></div>
+      <div class="card-main">
+        <div class="card-top" onclick="toggleCard(this)">
+          <div class="card-icon-wrap" style="background:${c.color}1A;border:1px solid ${c.color}38">${icon(c.id, c.color, 20)}</div>
+          <div class="card-identity">
+            <div class="card-name">${c.name}</div>
+            <div class="card-spec">${c.spec}</div>
+          </div>
+          <div class="card-chevron"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></div>
         </div>
-        <i data-lucide="chevron-down" class="card-chevron"></i>
-      </div>
-      <div class="card-body">
-        <div class="info-row"><div class="info-label">Role</div><div class="info-text">${c.role}</div></div>
-        <div class="info-row"><div class="info-label">Failure Mode</div><div class="info-text" style="color:var(--red);">${c.fails}</div></div>
-        <div class="info-row"><div class="info-label">Cost</div><div class="cost-pill">${c.cost}</div></div>
+        <div class="card-body">
+          <div class="info-block"><div class="info-lbl">Role in the warmer</div><div class="info-txt">${c.role}</div></div>
+          <div class="info-block"><div class="info-lbl">Engineering justification</div><div class="info-txt">${c.why}</div></div>
+          <div class="info-block"><div class="info-lbl">Failure behaviour</div><div class="fail-txt">${c.fails}</div></div>
+          <div class="info-block"><div class="info-lbl">Unit cost</div>
+            <div class="cost-tag" style="color:var(--live);border-color:rgba(0,229,160,.3);background:var(--live-dim)">
+              <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+              ${c.cost}
+            </div>
+          </div>
+        </div>
       </div>
     </div>`).join('');
-  renderIcons();
 }
 
-function toggleCard(header){
-  const card = header.closest('.card');
+function toggleCard(header) {
+  if (navigator.vibrate) navigator.vibrate(22);
+  const card = header.closest('.comp-card');
   const isOpen = card.classList.contains('open');
-  document.querySelectorAll('.card.open').forEach(c=>c.classList.remove('open'));
-  if(!isOpen) card.classList.add('open');
+  document.querySelectorAll('.comp-card.open').forEach(c => c.classList.remove('open'));
+  if (!isOpen) card.classList.add('open');
 }
 
-function buildReplace(){
-  document.getElementById('replaceGrid').innerHTML = COMPONENTS.map(c=>`
-    <div class="comp-pick" onclick="showReplace('${c.id}',this)">
-      <i data-lucide="${c.icon}" class="comp-pick-icon"></i>
-      <div class="comp-pick-name">${c.name.split(' ')[0]}</div>
-    </div>`).join('');
-  renderIcons();
+// ── REPLACE ──
+function buildReplace() {
+  document.getElementById('replaceGrid').innerHTML = COMPONENTS.filter(c => c.steps?.length).map(c =>
+    `<div class="comp-tile" onclick="showReplace('${c.id}',this)">${icon(c.id, c.color, 22)}<div class="comp-tile-name">${c.name}</div></div>`
+  ).join('');
 }
 
-function showReplace(id, el){
-  if(navigator.vibrate) navigator.vibrate(15);
-  const comp = COMPONENTS.find(c=>c.id===id);
-  document.querySelectorAll('.comp-pick').forEach(p=>p.classList.remove('selected'));
-  el.classList.add('selected');
+function showReplace(id, el) {
+  if (navigator.vibrate) navigator.vibrate(40);
+  const comp = COMPONENTS.find(c => c.id === id);
+  document.querySelectorAll('.comp-tile').forEach(t => t.classList.remove('sel'));
+  el.classList.add('sel');
   document.getElementById('rp-name').textContent = comp.name;
-  document.getElementById('rp-tools').innerHTML = comp.tools.map(t=>`<span class="tool-tag">${t}</span>`).join('');
-  document.getElementById('rp-steps').innerHTML = comp.steps.map((s,i)=>`
-    <div class="step-item">
-      <div class="step-num-badge">${i+1}</div>
-      <div><div class="step-title">${s.t}</div><div class="step-body">${s.b}</div></div>
-    </div>`).join('');
-  document.getElementById('replacePanel').classList.add('show');
+  document.getElementById('rp-icon').innerHTML = ICONS[id] || '';
+  document.getElementById('rp-icon').setAttribute('stroke', comp.color);
+  document.getElementById('rp-tools').innerHTML = comp.tools.map(t => `<span class="tool-chip">${t}</span>`).join('');
+  document.getElementById('rp-steps').innerHTML = comp.steps.map((s, i) =>
+    `<div class="step-row"><div class="step-num">${i+1}</div><div><div class="step-t">${s.t}</div><div class="step-b">${s.b}</div></div></div>`
+  ).join('');
+  const panel = document.getElementById('replacePanel');
+  panel.classList.add('show');
+  panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
-function buildDiagnostic(){
-  document.getElementById('faultTabs').innerHTML = FAULTS.map((f,i)=>`
-    <div class="fault-tab${i===0?' active':''}" onclick="showFault(${i},this)">${f.label}</div>`).join('');
-  showFault(0, document.querySelector('.fault-tab'));
+// ── DIAGNOSTIC ──
+function buildDiagnostic() {
+  const tabs = document.getElementById('faultTabs');
+  tabs.innerHTML = FAULTS.map((f, i) =>
+    `<div class="ftab${i===0?' active':''}" onclick="showFault(${i},this)">${f.label}</div>`
+  ).join('');
+  showFault(0, tabs.firstElementChild);
 }
 
-function showFault(idx, el){
-  if(navigator.vibrate) navigator.vibrate(10);
+function showFault(idx, el) {
+  if (navigator.vibrate) navigator.vibrate(25);
   const f = FAULTS[idx];
-  document.querySelectorAll('.fault-tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.ftab').forEach(t => t.classList.remove('active'));
   el.classList.add('active');
   document.getElementById('scenarioContainer').innerHTML = `
-    <div class="scenario-card show">
-      <div class="scenario-banner"><div class="scenario-type">${f.type}</div><div class="scenario-title">${f.title}</div></div>
-      <div class="readings-grid">
-        ${f.readings.map(r=>`<div class="reading-box"><div class="reading-label">${r.l}</div><div class="reading-val ${r.cls}">${r.v}</div></div>`).join('')}
+    <div class="monitor-card show">
+      <div class="monitor-banner">
+        <div class="banner-icon" style="color:var(--crit)">${icon(f.iconKey, 'var(--crit)', 28)}</div>
+        <div><div class="banner-type">${f.type}</div><div class="banner-title">${f.title}</div></div>
       </div>
-      <div style="padding:1rem;border-bottom:1px solid var(--border);"><div class="info-label">Diagnosis</div><div class="info-text">${f.diagnosis}</div></div>
-      <button class="reveal-btn" onclick="revealFix(this)">View Resolution Protocol</button>
-      <div class="fix-section" id="fix-section">
-        <div class="info-label" style="color:var(--text);">Protocol</div>
-        ${f.fix.map((step,i)=>`<div class="fix-step"><span class="fix-step-num">${i+1}.</span><span class="fix-step-text">${step}</span></div>`).join('')}
+      <div class="monitor-ctx">${f.context}</div>
+      <div class="readouts">${f.readings.map(r => `
+        <div class="readout ${r.cls}">
+          <div class="readout-lbl">${r.l}</div>
+          <div class="readout-val ${r.cls}">${r.v}</div>
+          ${r.u ? `<div class="readout-unit">${r.u}</div>` : ''}
+        </div>`).join('')}
+      </div>
+      <div class="diag-blk"><div class="diag-lbl">Symptoms</div><div class="diag-txt">${f.symptoms}</div></div>
+      <div class="diag-blk" style="border-bottom:none"><div class="diag-lbl">Root Cause Analysis</div><div class="diag-txt">${f.diagnosis}</div></div>
+      <button class="reveal-btn" onclick="revealFix(this)">Reveal step-by-step fix →</button>
+      <div class="fix-blk" id="fix-section">
+        <div class="fix-lbl">Fix Procedure</div>
+        ${f.fix.map((s,i) => `<div class="fix-row"><span class="fix-n">${i+1}.</span><span class="fix-t">${s}</span></div>`).join('')}
       </div>
     </div>`;
 }
 
-function revealFix(btn){
+function revealFix(btn) {
+  if (navigator.vibrate) navigator.vibrate(50);
   document.getElementById('fix-section').classList.add('show');
-  btn.style.display='none';
+  btn.style.display = 'none';
 }
 
-// ════════════════════════════════════════════════════════════════════════════
-//  AI MOCK LOGIC (OFFLINE PRESENTATION)
-// ════════════════════════════════════════════════════════════════════════════
-function sendMessage(){
-  const input = document.getElementById('chatInput');
-  const msg = input.value.trim().toLowerCase();
-  if(!msg) return;
-  if(navigator.vibrate) navigator.vibrate(10);
+// ── AI CO-PILOT ──
+const SYSTEM_PROMPT = `You are the NeoWatch AI Diagnostic Co-Pilot for a Smart Neonatal Warmer (Project 20/30GP030, UNILORIN Biomedical Engineering). You are embedded in a mobile training app used by biomedical technicians in Nigerian hospitals.
+YOUR ROLE: Diagnose problems and guide the technician to the correct fix. Be direct, practical, and clear.
+ARCHITECTURE: ESP32-WROOM-32 — PID on Core 0, Wi-Fi/MQTT on Core 1. DS18B20 sensors on GPIO4 (1-Wire, 4.7kΩ pull-up). SSR-40DA on GPIO5 PWM. Buzzer on GPIO2 via 100Ω. SD card SPI (GPIO18/19/23/15). LCD I2C (GPIO21/22, 0x27). LM2596 buck converter 12V→5V.
+CLINICAL: Setpoint 36.5°C · ALARM_LOW 35.0°C · ALARM_HIGH 38.0°C · Bimetal cutoff 38.5°C hardware.
+CRITICAL RULES: PID=100%+falling temp=actuator failure (heater or SSR open). PID=0%+rising temp=SSR shorted CLOSED (EMERGENCY — cut power, move patient NOW). FAULT/-127°C=DS18B20 disconnected. Device dead+battery=12V=LM2596 failure. LCD blank+buzzer working=5V rail issue.
+STYLE: Concise and actionable. Lead with diagnosis. Numbered steps for fixes. Flag patient safety immediately.`;
 
-  addMessage(input.value, 'user');
+const chatHistory = [];
+
+function buildQuickPrompts() {
+  document.getElementById('quickList').innerHTML = QUICK_PROMPTS.map(p =>
+    `<button class="qbtn" onclick="quickPrompt(this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+      ${p}
+    </button>`
+  ).join('');
+}
+
+async function sendMessage() {
+  const input = document.getElementById('chatInput');
+  const msg = input.value.trim();
+  if (!msg) return;
+  if (navigator.vibrate) navigator.vibrate(30);
+  addMessage(msg, 'user');
   input.value = '';
   document.getElementById('sendBtn').disabled = true;
+  chatHistory.push({ role: 'user', content: msg });
 
-  const thinkingId = 'thinking-'+Date.now();
-  addMessage('Processing telemetry...', 'ai thinking', thinkingId);
+  const thinkId = 'think-' + Date.now();
+  const thinkDiv = document.createElement('div');
+  thinkDiv.className = 'msg ai thinking';
+  thinkDiv.id = thinkId;
+  thinkDiv.innerHTML = '<div class="dots"><span></span><span></span><span></span></div>';
+  document.getElementById('chatWindow').querySelector('.chat-welcome')?.remove();
+  document.getElementById('chatWindow').appendChild(thinkDiv);
+  thinkDiv.scrollIntoView({ behavior: 'smooth', block: 'end' });
 
-  setTimeout(() => {
-    document.getElementById(thinkingId).remove();
-    let reply = "Query logged. Specify components or readings (e.g., 'falling temp', 'blank LCD').";
-    if(msg.includes("cold") || msg.includes("falling") || msg.includes("100%")) {
-      reply = "CRITICAL DIAGNOSIS:\nPID is saturated (100%) but heat is escaping. \n\n1. Measure Nichrome element resistance (~1.44Ω).\n2. Verify SSR output voltage.";
-    } else if (msg.includes("rising") || msg.includes("hot") || msg.includes("off")) {
-      reply = "EMERGENCY:\nControl loop decoupled. SSR has failed CLOSED.\n\nACTION: Cut mains power. Evacuate neonate.";
-    } else if (msg.includes("blank") || msg.includes("dead") || msg.includes("power")) {
-      reply = "POWER FAULT:\n12V battery operational, 5V logic failing.\n\nACTION: Probe LM2596 Buck Converter output.";
-    }
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 1000, system: SYSTEM_PROMPT, messages: chatHistory })
+    });
+    const data = await res.json();
+    const reply = data.content?.[0]?.text || 'Could not generate a response. Please try again.';
+    chatHistory.push({ role: 'assistant', content: reply });
+    document.getElementById(thinkId)?.remove();
     addMessage(reply, 'ai');
-    document.getElementById('sendBtn').disabled = false;
-  }, 1000);
+    if (navigator.vibrate) navigator.vibrate(20);
+  } catch {
+    document.getElementById(thinkId)?.remove();
+    addMessage('Connection error — check your internet connection and try again.', 'ai');
+  }
+  document.getElementById('sendBtn').disabled = false;
 }
 
-function addMessage(text, type, id){
+function addMessage(text, type) {
   const win = document.getElementById('chatWindow');
+  win.querySelector('.chat-welcome')?.remove();
   const div = document.createElement('div');
-  div.className = 'msg '+type;
-  if(id) div.id = id;
-  div.innerHTML = text.replace(/\n/g,'<br>');
+  div.className = 'msg ' + type;
+  div.innerHTML = text.replace(/\n/g, '<br>').replace(/(\d+\.\s)/g, '<br>$1');
   win.appendChild(div);
-  div.scrollTop = div.scrollHeight;
+  div.scrollIntoView({ behavior: 'smooth', block: 'end' });
 }
 
-function quickPrompt(btn){
+function quickPrompt(btn) {
+  if (navigator.vibrate) navigator.vibrate(30);
   document.getElementById('chatInput').value = btn.textContent.trim();
   sendMessage();
 }
 
-document.getElementById('chatInput').addEventListener('keydown', e=>{ if(e.key==='Enter') sendMessage(); });
-
-// ════════════════════════════════════════════════════════════════════════════
-//  3D RENDER ENGINE (Standardized)
-// ════════════════════════════════════════════════════════════════════════════
-let scene, camera, renderer, group, is3DInitialized = false;
-function launch3D(){
-  if(is3DInitialized) return;
+// ── 3D ──
+let scene, camera, renderer, group, is3D = false;
+function launch3D() {
+  if (is3D) return;
+  if (navigator.vibrate) navigator.vibrate([30,20,30]);
   const slot = document.getElementById('threejsSlot');
-  slot.innerHTML = ''; slot.style.padding = '0';
-  
-  scene = new THREE.Scene();
-  scene.background = new THREE.Color(0x0A0A0A);
-  camera = new THREE.PerspectiveCamera(45, slot.clientWidth/slot.clientHeight, 0.1, 100);
-  camera.position.set(0,0,6);
-  
-  renderer = new THREE.WebGLRenderer({antialias:true});
+  slot.innerHTML = ''; slot.style.padding = '0'; slot.style.minHeight = '300px';
+  scene = new THREE.Scene(); scene.background = new THREE.Color(0x04080F);
+  camera = new THREE.PerspectiveCamera(42, slot.clientWidth/slot.clientHeight, 0.1, 100);
+  camera.position.set(0,0,5.8);
+  renderer = new THREE.WebGLRenderer({ antialias: true });
   renderer.setSize(slot.clientWidth, slot.clientHeight);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
   slot.appendChild(renderer.domElement);
-  
-  scene.add(new THREE.AmbientLight(0xFFFFFF, 0.2));
-  const light = new THREE.DirectionalLight(0xFFFFFF, 1.5);
-  light.position.set(2, 5, 3);
-  scene.add(light);
-  
-  group = new THREE.Group();
-  scene.add(group);
-  
-  // Clean monochromatic boxes
+  scene.add(new THREE.AmbientLight(0xE8EEF6, 0.45));
+  const key = new THREE.DirectionalLight(0x00E5A0, 1.0); key.position.set(3,5,4); scene.add(key);
+  const fill = new THREE.DirectionalLight(0x3D9EFF, 0.5); fill.position.set(-4,-2,2); scene.add(fill);
+  group = new THREE.Group(); scene.add(group);
   COMPONENTS.forEach((comp, i) => {
-    const geo = new THREE.BoxGeometry(0.5, 0.5, 0.5);
-    const mat = new THREE.MeshStandardMaterial({ color: 0x333333, roughness: 0.2, metalness: 0.8 });
-    const mesh = new THREE.Mesh(geo, mat);
-    mesh.position.set((i%3)*1.2 - 1.2, Math.floor(i/3)*-1.2 + 1.2, 0);
-    
-    // Add wireframe edge for tech look
-    const edges = new THREE.EdgesGeometry(geo);
-    const line = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({color: 0x666666}));
-    mesh.add(line);
-    
+    const mat = new THREE.MeshStandardMaterial({ color: parseInt(comp.color.replace('#',''),16), metalness: 0.45, roughness: 0.3 });
+    const mesh = new THREE.Mesh(new THREE.BoxGeometry(0.5,0.5,0.5), mat);
+    mesh.position.x = (i%4)*1.1 - 1.65; mesh.position.y = Math.floor(i/4)*-1.1 + 1.1;
     group.add(mesh);
   });
-  
-  is3DInitialized = true;
-  animate3D();
+  is3D = true; animate3D();
 }
-function animate3D(){ requestAnimationFrame(animate3D); if(group) group.rotation.y += 0.005; renderer.render(scene, camera); }
+function animate3D() { requestAnimationFrame(animate3D); if(group) group.rotation.y+=0.004; renderer.render(scene,camera); }
 
-// INIT
-buildAnatomy(); buildReplace(); buildDiagnostic(); renderIcons();
-addMessage("System online. Waiting for telemetry...", "ai");
+// ── OFFLINE ──
+window.addEventListener('offline', () => {
+  const b = document.getElementById('offlineBadge');
+  b.textContent='● OFFLINE'; b.style.cssText='background:rgba(245,166,35,.12);border-color:rgba(245,166,35,.4);color:var(--warn)';
+  showToast('Offline — Anatomy, Replace & Diagnose available locally');
+  if(navigator.vibrate) navigator.vibrate([100,60,100]);
+});
+window.addEventListener('online', () => { const b=document.getElementById('offlineBadge'); b.textContent='● LIVE'; b.style.cssText=''; });
+function showToast(msg) { const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),3500); }
+
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('chatInput').addEventListener('keydown', e => { if(e.key==='Enter') sendMessage(); });
+});
+
+buildAnatomy(); buildReplace(); buildDiagnostic(); buildQuickPrompts();
 </script>
 </body>
 </html>
-```
